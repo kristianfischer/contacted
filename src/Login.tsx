@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Text, SafeAreaView, TextInput, Button, Image } from 'react-native';
+import { Text, SafeAreaView, TextInput, TouchableOpacity, StyleSheet, Pressable } from 'react-native';
 import { initializeApp } from "firebase/app";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
 
@@ -53,43 +53,67 @@ const Login = () => {
     return (
         <SafeAreaView>
 
-            <Text
-                className="text-6xl"
-            >
-                Login
-            </Text>
-
+            <Text style = {styles.Titletext}>Login</Text>
 
             <TextInput
                 id="email"
-                className="w-full mt-1 border px-4 py-2 focus:border-gray-300"
                 placeholder="Email"
                 onChangeText={setEmail}
                 value={email}
-                style={{padding: 10}}   
-            /> 
-            
+                style={styles.input}  
+            />
+
             <TextInput
+                style={styles.input}
                 id="password"
-                className="w-full mt-1 border px-4 py-2 focus:border-gray-300"
                 placeholder="Password"
                 onChangeText={setPassword}
                 value={password}
-                style={{padding: 10}}   
-            /> 
-
-            <Button
-                title="Login"
-                color="#f194ff"
-                onPress={SignIn}
-                />
-                
-            <Button
-                title="Not a Member? Register Here"
-                onPress={SignUp}
             />
+
+            <TouchableOpacity style={styles.button} onPress={SignIn}>
+                <Text> Login </Text>
+            </TouchableOpacity>
+                
+            <Pressable
+                onPress={() => {SignUp}}>
+                <Text style={styles.text}>{"Not a Member? Register Here"}</Text>
+            </Pressable>
+
         </SafeAreaView>
     );
 };
+
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        justifyContent: 'center',
+        paddingHorizontal: 10,
+    },
+    Titletext: {
+        alignSelf: 'center',
+        fontSize: 60,
+        color: 'black'
+    },
+    text: {
+        fontSize: 16,
+        color: 'blue'
+    },
+    button: {
+        alignItems: 'center',
+        backgroundColor: '#DDDDDD',
+        padding: 10,
+    },
+    countContainer: {
+        alignItems: 'center',
+        padding: 10,
+    },
+    input: {
+        height: 40,
+        margin: 12,
+        borderWidth: 1,
+        padding: 10,
+    },
+    });
     
 export default Login;
