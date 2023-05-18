@@ -1,119 +1,71 @@
 import React, { useState } from "react";
-import { Text, SafeAreaView, TextInput, TouchableOpacity, StyleSheet, Pressable } from 'react-native';
-import { initializeApp } from "firebase/app";
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
+import { Text, SafeAreaView, TextInput, TouchableOpacity, Pressable, View } from 'react-native';
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, User } from "firebase/auth";
 
-
-const firebaseConfig = {
-    apiKey: "AIzaSyCjASomuifpgKwYpgOmXwuvDby-cBh_Wso",
-    authDomain: "contacted-b203c.firebaseapp.com",
-    projectId: "contacted-b203c",
-    storageBucket: "contacted-b203c.appspot.com",
-    messagingSenderId: "560930713469",
-    appId: "1:560930713469:web:0f7c2c6dd8923a0a56a614",
-    measurementId: "G-CSHHR0914L"
-};
-
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-
-
-const Login = () => {
+const Login = ({setUser = (user: User) => {}}) => {
 
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    
 
     const SignUp = async () => {
+        const auth = getAuth();
         createUserWithEmailAndPassword(auth, email, password)
             .then((userCredential) => {
-                // Signed in 
-                console.log("hi");
-                const user = userCredential.user;
+                setUser(userCredential.user);
             })
             .catch((error) => {
                 const errorCode = error.code;
                 const errorMessage = error.message;
-                console.log(errorMessage);
             });
     }
 
     const SignIn = async () => {
-        signInWithEmailAndPassword(auth, email, password)
+        const auth = getAuth();
+        return signInWithEmailAndPassword(auth, email, password)
             .then((userCredential) => {
-                const user = userCredential.user;
-                console.log("success");
+                setUser(userCredential.user);
             })
             .catch((error) => {
                 const errorCode = error.code;
                 const errorMessage = error.message;
-                console.log(errorMessage);
             });
     }
 
     return (
-        <SafeAreaView>
+        <SafeAreaView className="flex flex-1 items-center justify-start w-full space-y-16">
 
-            <Text style = {styles.Titletext}>Login</Text>
+            <Text className="pt-16 text-6xl">Login</Text>
+            
+            <View className="w-[50%] space-y-8">
+                <TextInput
+                    id="email"
+                    placeholder="Email"
+                    onChangeText={setEmail}
+                    value={email}
+                    className="h-10 m-3 border-2 p-2 w-fit"
+                />   
+                <TextInput
+                    id="password"
+                    placeholder="Password"
+                    onChangeText={setPassword}
+                    value={password}
+                    className="h-10 m-3 border-2 p-2 w-fit"
+                />
+            </View>
 
-            <TextInput
-                id="email"
-                placeholder="Email"
-                onChangeText={setEmail}
-                value={email}
-                style={styles.input}  
-            />
-
-            <TextInput
-                style={styles.input}
-                id="password"
-                placeholder="Password"
-                onChangeText={setPassword}
-                value={password}
-            />
-
-            <TouchableOpacity style={styles.button} onPress={SignIn}>
-                <Text> Login </Text>
+            <TouchableOpacity className="p-3 items-center justify-center bg-blue-400" onPress={SignIn}>
+                <Text className="p-2 px-4 text-white"> Login </Text>
             </TouchableOpacity>
                 
             <Pressable
-                onPress={() => {SignUp}}>
-                <Text style={styles.text}>{"Not a Member? Register Here"}</Text>
+                className="h-40 m-12 border-1 p-2"
+                onPress={() => { SignUp() }}>
+                <Text className="p-16 text-blue-400">Not a Member? Register Here</Text>
             </Pressable>
 
         </SafeAreaView>
     );
 };
-
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        justifyContent: 'center',
-        paddingHorizontal: 10,
-    },
-    Titletext: {
-        alignSelf: 'center',
-        fontSize: 60,
-        color: 'black'
-    },
-    text: {
-        fontSize: 16,
-        color: 'blue'
-    },
-    button: {
-        alignItems: 'center',
-        backgroundColor: '#DDDDDD',
-        padding: 10,
-    },
-    countContainer: {
-        alignItems: 'center',
-        padding: 10,
-    },
-    input: {
-        height: 40,
-        margin: 12,
-        borderWidth: 1,
-        padding: 10,
-    },
-    });
     
 export default Login;
