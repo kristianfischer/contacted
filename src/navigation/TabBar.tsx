@@ -4,7 +4,7 @@ import { Octicons } from '@expo/vector-icons';
 
 export function MyTabBar({ state, descriptors, navigation }) {
   return (
-    <View className="flex-row mt-5">
+    <View className="flex-row border-t-2 pt-5">
       {state.routes.map((route, index) => {
         const { options } = descriptors[route.key];
         const label =
@@ -41,17 +41,17 @@ export function MyTabBar({ state, descriptors, navigation }) {
 
         return (
           <TouchableOpacity
-            className='flex px-12 mb-3'
+            className='flex pl-14 mb-3'
             onPress={onPress}
             onLongPress={onLongPress}
             style={{ flex: 1 }}
             key={route.name}
           >
-            <Octicons 
+            <Octicons  
               name={route.name == "Contacts" ? "people" : route.name == "Add Contact" ? "person-add" : "light-bulb"}
               size={25} 
               color="black" 
-            />
+              />
             <Octicons
               name= "dash"
               size={25} 

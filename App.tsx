@@ -7,7 +7,7 @@ import "./firebaseConfig"
 import { UserContextProvider } from './src/providers/UserProvider';
 import TabNavigator from './src/navigation/TabNavigator';
 import { NavigationContainer } from '@react-navigation/native';
-import { Ionicons } from '@expo/vector-icons';
+
 
 
 type UserState = User | undefined;

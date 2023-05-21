@@ -1,11 +1,13 @@
 import React, { useState } from "react";
 import { Text, SafeAreaView, TextInput, TouchableOpacity, Pressable, View } from 'react-native';
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, User } from "firebase/auth";
-
+import { getAuth, signInWithEmailAndPassword, User, createUserWithEmailAndPassword } from "firebase/auth";
 const Login = ({setUser = (user: User) => {}}) => {
 
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+
+    
+
     
 
     const SignUp = async () => {
@@ -67,5 +69,5 @@ const Login = ({setUser = (user: User) => {}}) => {
         </SafeAreaView>
     );
 };
-    
+
 export default Login;

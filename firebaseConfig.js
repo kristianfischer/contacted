@@ -1,23 +1,25 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
 import { getReactNativePersistence } from "firebase/auth/react-native"
-import { getAnalytics } from "firebase/analytics";
+import { getFirestore } from "firebase/firestore";
 import { initializeAuth } from "firebase/auth";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyCjASomuifpgKwYpgOmXwuvDby-cBh_Wso",
-  authDomain: "contacted-b203c.firebaseapp.com",
-  projectId: "contacted-b203c",
-  storageBucket: "contacted-b203c.appspot.com",
-  messagingSenderId: "560930713469",
-  appId: "1:560930713469:web:0f7c2c6dd8923a0a56a614",
-  measurementId: "G-CSHHR0914L"
+  apiKey: "AIzaSyAupiCpZX_G-MfhharrkshGQIrzi3ti0Lk",
+  authDomain: "contacted-1f3ad.firebaseapp.com",
+  projectId: "contacted-1f3ad",
+  storageBucket: "contacted-1f3ad.appspot.com",
+  messagingSenderId: "1005730373512",
+  appId: "1:1005730373512:web:3dc923e858e2ddd506e43d",
+  measurementId: "G-684F4CFQNH"
 };
 
-// Initialize Firebase
+
 const app = initializeApp(firebaseConfig);
-// const analytics = getAnalytics(app);
+
 initializeAuth(app, {
   persistence: getReactNativePersistence(AsyncStorage)
 })
+
+const db = getFirestore(app);
