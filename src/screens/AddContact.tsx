@@ -4,15 +4,21 @@ import { Zocial } from '@expo/vector-icons';
 import { Octicons } from '@expo/vector-icons'; 
 import { MaterialIcons } from '@expo/vector-icons'; 
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { collection, addDoc, getFirestore } from "firebase/firestore";
+import { collection, addDoc, doc, setDoc, getFirestore } from "firebase/firestore";
 import FrequencyCard from '../components/addpage/FrequencyCard';
 import RelationshipCard from '../components/addpage/RelationshipCard';
 import ContactHead from '../components/addpage/ContactHead';
 import InformationCard from '../components/addpage/InformationCard';
+import { useNavigation } from '@react-navigation/native';
+import ContactScreen from './ContactScreen';
+
+//(firstname != "" && lastname != "" && (prof == true || friend == true || fam == true) && ans != "") ?  handleAddContact()  : sendError() }}>
 
 const db = getFirestore();
 
 const AddContact = ({ }) => {
+
+    const today = new Date();
 
     const [firstname, setFirst] = useState("");
     const [lastname, setLast] = useState("");
@@ -46,8 +52,14 @@ const AddContact = ({ }) => {
     const [biy, setBiy] = useState(false);
     const [ans, setAns] = useState("");
 
+    const [iter, setIter] = useState(0);
+
+    function sendError() {
+        return console.log("error");
+    }
+
     const Revertother = (first) => {
-        setAns(first);
+
         if (first == "Professional") {
             setProf(!prof);
             setFam(false);
@@ -85,38 +97,56 @@ const AddContact = ({ }) => {
             setMn(false);
             setWk(false);
         } else if (first == "Twice a week") {
+            setIter(4);
+            setAns(first);
             setTwoaw(!twoaw);
             setOneaw(false);
             setBiw(false);
         } else if (first == "Once a week") {
+            setIter(7)
+            setAns(first);
             setTwoaw(false);
             setOneaw(!oneaw);
             setBiw(false);
         } else if (first == "Bi-weekly") {
+            setIter(14)
+            setAns(first);
             setTwoaw(false);
             setOneaw(false);
             setBiw(!biw);
         } else if (first == "Once a month") {
+            setIter(30)
+            setAns(first);
             setOneam(!oneam);
             setBim(false);
             setTrim(false);
         } else if (first == "Bi-monthly") {
+            setIter(60)
+            setAns(first);
             setOneam(false);
             setBim(!bim);
             setTrim(false);
         } else if (first == "Tri-monthly") {
+            setIter(90)
+            setAns(first);
             setOneam(false);
             setBim(false);
             setTrim(!trim);
         } else if (first == "Semi-annually") {
+            setIter(180)
+            setAns(first);
             setHyr(!hyr);
             setOneay(false);
             setBiy(false);
         } else if (first == "Once a year") {
+            setIter(365)
+            setAns(first);
             setHyr(false);
             setOneay(!oneay);
             setBiy(false);
         } else if (first == "Bi-annually") {
+            setIter(730)
+            setAns(first);
             setHyr(false);
             setOneay(false);
             setBiy(!biy);
@@ -134,52 +164,40 @@ const AddContact = ({ }) => {
             return third
     }
 
-    const dothing = (one) => {
-        if (ans == "wk") {
-            if (checktruth(twoaw, oneaw, biw) == twoaw)
-                return "Twice a week"
-            else if (checktruth(twoaw, oneaw, biw) == oneaw)
-                return "Once a week"
-            else if (checktruth(twoaw, oneaw, biw) == biw)
-                return "Bi-weekly"
-        } else if (ans == "mn") {
-            if (checktruth(oneam, bim, trim) == oneam)
-                return "Once a month"
-            else if (checktruth(oneam, bim, trim) == bim)
-                return "Bi-monthly"
-            else if (checktruth(oneam, bim, trim) == trim)
-                return "Tri-monthly"
-        } else if (ans == "yr") {
-            if (checktruth(hyr, oneay, biy) == hyr)
-                return "Semi-annually"
-            else if (checktruth(hyr, oneay, biy) == oneay)
-                return "Once a year"
-            else if (checktruth(hyr, oneay, biy) == biy)
-                return "Bi-anually"
-            else
-                return "undefined"
-        }
-    }
-
     const addtobase = async () => {
-        
+        var newdate;
+        if (days == true) {
+            newdate = new Date(today.getTime() - (parseInt(duration) * 24 * 60 * 60 * 1000));
+        } else if (months == true) {
+            newdate = new Date(today.getFullYear() - Math.floor(parseInt(duration) / 12), today.getMonth() - (parseInt(duration) % 12), today.getDate());
+        } else if (years == true) {
+            newdate = new Date(today.getFullYear() - parseInt(duration), today.getMonth(), today.getDate());
+        }
+            
+
         try {
-            const docRef = await addDoc(collection(db, "Contacts"), {
+            const docRef = await setDoc(doc(db, "Contacts", lastname + ", " + firstname), {
                 first: firstname,
                 last: lastname,
                 number: number1.concat("-", number2, "-", number3),
                 email: email,
-                insta: insta, 
+                insta: insta,
                 snap: snap,
                 relation: checktruth(prof, fam, friend) == prof ? "Professional" : checktruth(prof, fam, friend) == fam ? "Family" : "Friend",
                 unit: checktruth(days, months, years) == days ? "Days" : checktruth(days, months, years) == months ? "Months" : "Years",
                 lor: duration,
                 freqgen: checktruth(wks, mns, yrs) == wks ? "Weekly" : checktruth(wks, mns, yrs) == mns ? "Monthly" : "Yearly",
-                freqspec: ans
+                freqspec: ans,
+                metdate: String(newdate).substring(0, 15),
+                startdate: String(today),
+                iterative: String(iter),
+                color: prof == true ? "bg-orange-200" : friend == true ? "bg-yellow-100" : fam == true ? "bg-pink-200" : "bg-gray-100"
+
             });  
             } catch (e) {
             console.error("Error adding document: ", e);
         }
+
         setFirst("");
         setLast("");
         setNumber1("");
@@ -207,15 +225,13 @@ const AddContact = ({ }) => {
         setHyr(false);
         setOneay(false);
         setBiy(false);
+        setIter(0)
     }
 
 
     return (
         <View className="h-full flex flex-1 justify-start w-full bg-white">
             
-
-            
-
 
             <View className='w-full px-3 h-full mb-3 bg-white'>
                 <ScrollView
@@ -224,13 +240,14 @@ const AddContact = ({ }) => {
                     scrollToOverflowEnabled
                 >
                     
-                    <View className='flex-row mt-8 space-x-36'>    
-                        <Text className='text-3xl text-start pt-6 ml-3'>
+
+                    <View className='flex-row space-x-32'>    
+                        <Text className='text-3xl text-start ml-3'>
                             New Contact
                         </Text>
                         <TouchableOpacity
-                            className='mt-7'
-                        onPress={addtobase}>
+                            className='mt-1'
+                            onPress={() => { (firstname != "" && lastname != "" && (prof == true || friend == true || fam == true) && ans != "") ?  addtobase()  : sendError() }}>
                             <Octicons
                                 name='plus'
                                 size={30}
@@ -240,7 +257,7 @@ const AddContact = ({ }) => {
                     </View>
 
 
-                    <View className={'flex-row w-full bg-gray-100 rounded-lg border-2 mt-3'}>
+                    <View className={prof==true?'flex-row w-full bg-orange-200 rounded-lg border-2 mt-3' : friend == true ? 'flex-row w-full bg-yellow-100 rounded-lg border-2 mt-3' : fam == true ? 'flex-row w-full bg-pink-200 rounded-lg border-2 mt-3' : 'flex-row w-full bg-gray-100 rounded-lg border-2 mt-3'}>
                         <View className={'flex-col w-full pl-4 w-[75%]'}>
                             <TextInput
                                 className= 'h-12 text-start text-xl'
@@ -276,8 +293,7 @@ const AddContact = ({ }) => {
                         </Text>
                     </View>
 
-
-                    <View className='flex-col w-full space-y-5 bg-gray-100 rounded-lg border-2'>
+                    <View className={prof==true?'flex-col w-full space-y-5 bg-orange-200 rounded-lg border-2' : friend == true ? 'flex-col w-full space-y-5 bg-yellow-100 rounded-lg border-2' : fam == true ? 'flex-col w-full space-y-5 bg-pink-200 rounded-lg border-2' : 'flex-col w-full space-y-5 bg-gray-100 rounded-lg border-2'}>
                         <View className='flex-row pt-3 space-x-12 pl-5'>
                             <Octicons
                                 name="comment-discussion"
@@ -374,11 +390,11 @@ const AddContact = ({ }) => {
                     </View>
 
 
-                    <View className='flex-col w-full space-y-6 px-8 mt-4 pt-4 pb-3 mb-8 border-2 rounded-lg bg-gray-100'>
-                        <View className='flex-row space-x-10'>
+                    <View className={prof==true?'flex-col w-full space-y-6 px-8 mt-4 pt-4 pb-3 mb-8 border-2 rounded-lg bg-orange-200' : friend == true ? 'flex-col w-full space-y-6 px-8 mt-4 pt-4 pb-3 mb-8 border-2 rounded-lg bg-yellow-100' : fam == true ? 'flex-col w-full space-y-6 px-8 mt-4 pt-4 pb-3 mb-8 border-2 rounded-lg bg-pink-200' : 'flex-col w-full space-y-6 px-8 mt-4 pt-4 pb-3 mb-8 border-2 rounded-lg bg-gray-100'}>
+
+                        <View className='flex-row space-x-9'>
                             <Pressable
-                                onPress={() => { Revertother("Professional") }}
-                                className='pl-2'>
+                                onPress={() => { Revertother("Professional") }}>
                                 <Text
                                     className={prof==true ? 'text-black text-lg' : 'text-gray-400 text-lg'}>
                                         Professional
@@ -405,7 +421,7 @@ const AddContact = ({ }) => {
                                     className='w-full h-7 text-center text-lg text-black italic'>
                                     How long have you known them?
                                 </Text>
-                                <View className='flex-row space-x-10 pl-8 pt-6'>
+                                <View className='flex-row space-x-10 pl-4 pt-6'>
                                 <Pressable
                                     onPress={() => { Revertother("Days") }}
                                     className='pl-2'>
@@ -455,13 +471,13 @@ const AddContact = ({ }) => {
                         </Text>
                     </View>
 
-
-                    <View className='flex-col w-full mt-4 space-y-6 px-4 pt-2 border-2 rounded-lg bg-gray-100'>
+                    
+                    <View className={prof==true?'flex-col w-full space-y-6 px-4 mt-4 pt-2 border-2 rounded-lg bg-orange-200' : friend == true ? 'flex-col w-full space-y-6 px-4 mt-4 pt-2 border-2 rounded-lg bg-yellow-100' : fam == true ? 'flex-col w-full space-y-6 px-4 mt-4 pt-2 border-2 rounded-lg bg-pink-200' : 'flex-col w-full space-y-6 px-4 mt-4 pt-2 border-2 rounded-lg bg-gray-100'}>
                         <Text
                             className='w-full h-7 pb-2 text-center text-lg text-black italic'>
                             How often do you want to reach out?
                         </Text>
-                        <View className='flex-row space-x-10 pl-10'>
+                        <View className='flex-row space-x-10 pl-6'>
                             <Pressable
                                 
                                 onPress={() => { Revertother("Weekly")}}>
@@ -486,7 +502,7 @@ const AddContact = ({ }) => {
                             </Pressable>
                         </View>
                         {(wks == true) ? 
-                        <View className='flex-row space-x-5 pb-4'>
+                        <View className='flex-row space-x-2 pb-4'>
                             <Pressable
                                 className='' 
                                 onPress={() => {  Revertother("Twice a week")}}>
@@ -510,7 +526,7 @@ const AddContact = ({ }) => {
                                 </Text>
                             </Pressable>
                         </View> : (mns == true) ? 
-                            <View className='flex-row space-x-5 pb-4'>
+                        <View className='flex-row space-x-2 pb-4'>
                             <Pressable
                                 onPress={() => { Revertother("Once a month")}}>
                                 <Text
@@ -533,7 +549,7 @@ const AddContact = ({ }) => {
                                 </Text>
                             </Pressable>
                         </View> : (yrs == true) ? 
-                            <View className='flex-row space-x-4 pb-4'>
+                        <View className='flex-row space-x-1 pb-4'>
                             <Pressable
                                 onPress={() => { Revertother("Semi-annually")}}>
                                 <Text
@@ -570,3 +586,4 @@ const AddContact = ({ }) => {
 };
 
 export default AddContact;
+

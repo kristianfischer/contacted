@@ -51,7 +51,7 @@ const Recommendations = ({ }) => {
         <View className="h-full flex flex-1 justify-start w-full bg-white pt-20">
             <View className='items-start pl-5'>
                 <Text className='text-3xl'>
-                    Need Ideas?
+                    Need Help Reaching Out?
                 </Text>
                 <Text className='text-md pl-3 pt-2 pb-4'>
                     Press a subject and get a reccomended message to reach out with!

@@ -8,33 +8,30 @@ import React, { useState } from "react";
     const [message, setMessage] = useState("");
 
         return (
-            <View className='px-3 w-full h-[40%] bg-white pt-3'>
-                <View className='flex-row space-x-56'>
-                    <Text className=' text-2xl'>
-                        Messages
-                    </Text>
-                    <TouchableOpacity
-                        className='pl-26 pt-1'>
-                        <Octicons
-                            name="paper-airplane"
-                            size={25}
-                            color="black">
-                        </Octicons>
-                    </TouchableOpacity>
-                </View>
+            <View className='px-3 w-full h-[42%] bg-white pt-5'>
                 <View className='items-center pt-3'>
-                    <TouchableOpacity
-                        className='rounded-3xl h-8 w-[80%] bg-gray-200'>
-                        <Text className='pt-2 pl-3'>
-                            To:
-                        </Text>
-                    </TouchableOpacity>
+                    <View className='flex-row'>
+                        <TouchableOpacity
+                            className='rounded-3xl h-8 w-[70%] bg-gray-200'>
+                            <Text className='pt-2 pl-3'>
+                                To:
+                            </Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                            className='pl-3 pt-0.5'>
+                            <Octicons
+                                name="paper-airplane"
+                                size={27}
+                                color = "black">
+                            </Octicons>
+                        </TouchableOpacity>
+                    </View>
                     <TextInput
                         id="message"
                         placeholder="Need inspiration? Visit reccomendations!"
                         onChangeText={setMessage}
                         value={message}
-                        className=" m-3 border-2 pl-2 pb-28 rounded-xl h-[65%] w-[90%] bg-gray-100"
+                        className=" m-3 border-2 pl-2 pb-28 rounded-xl h-[67%] w-[90%] bg-gray-100"
                     />
                 </View>
             </View>

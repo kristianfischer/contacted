@@ -23,7 +23,7 @@ const retrieveContacts = async () => {
     }
 };
 
-const buildContactCards = async () => {
+const buildContactCards = async (onCardPress) => {
     try {
         const contacts = await retrieveContacts();
         const contactCards = [];
@@ -32,16 +32,20 @@ const buildContactCards = async () => {
         for (let i = 0; i < conlength; i++) {
             contactCards.push(
                 <TouchableOpacity
-                    //onPress={ContactView}
+                    onPress={() => onCardPress(contacts[i])}
                     key={"contact: " + (i + 1)}
-                    className='rounded-md h-14 bg-white space-x-3 border-2'>
-                    <View className='flex-row'>
-                        <Text className='pl-3 pt-1'>
-                            {contacts[i].first + " " + contacts[i].last}
-                        </Text>
-                        <Text className='pt-1 ml-5'>
-                            {contacts[i].number}
-                        </Text>
+                    className={contacts[i].color == "bg-orange-200" ? 'rounded-md h-14 bg-orange-200 space-x-3 border-2' : contacts[i].color == "bg-pink-200" ? 'rounded-md h-14 bg-pink-200 space-x-3 border-2' : 'rounded-md h-14 bg-yellow-100 space-x-3 border-2'}>
+                    <View className='flex-row w-full'>
+                        <View className='items-start pl-3 pt-1 w-[50%]'>
+                            <Text>
+                                {contacts[i].first + " " + contacts[i].last}
+                            </Text>
+                        </View>
+                        <View className='pt-1 items-end w-[50%] pr-2'>
+                            <Text>
+                                {contacts[i].number}
+                            </Text>
+                        </View>
                     </View>
                     <View className={contacts[i].relation != "Professional" ? 'flex-row': 'flex-row space-x-3'}>
                         <Text className='pt-1 text-gray-400'>

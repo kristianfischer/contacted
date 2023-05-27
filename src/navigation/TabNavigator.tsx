@@ -4,6 +4,9 @@ import Home from "../screens/Home";
 import { MyTabBar } from "./TabBar";
 import Recommendations from "../screens/Recommendations";
 import AddContact from "../screens/AddContact";
+import ContactScreen from "../screens/ContactScreen";
+
+
 
 const Tab = createBottomTabNavigator();
 
@@ -18,9 +21,10 @@ const TabNavigator = () => {
       <Tab.Screen name = "Contacts" component={Home} options={{
         tabBarLabel: 'Contacts',
         }} />
-      <Tab.Screen name="Add Contact" component={AddContact} options={{
+      <Tab.Screen name="Add Contact" component={ContactScreen} options={{
         tabBarLabel: 'Add Contact',
-        }} />
+      }} />
+      
       <Tab.Screen name="Reccomendations" component={Recommendations} options={{
         tabBarLabel: 'Reccomendations',
         }} />

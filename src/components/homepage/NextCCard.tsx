@@ -5,15 +5,18 @@ import { getDocs, collection, getFirestore } from "firebase/firestore";
 const today = new Date();
 const dayow = today.getDay();
 const db = getFirestore();
+var counter = 0;
 
-const getInfo = async () => {
-    const infoList = [];
-    const querySnapshot = await getDocs(collection(db, "Contacts"));
-    querySnapshot.forEach((doc) => {
-        infoList.push(doc.data());
-    });
-    return infoList;
+
+    const getInfo = async () => {
+        const infoList = [];
+        const querySnapshot = await getDocs(collection(db, "Contacts"));
+        querySnapshot.forEach((doc) => {
+            infoList.push(doc.data());
+        });
+        return infoList;
 };
+    
 
 const retrieveInfo = async () => {
     try {
@@ -34,14 +37,15 @@ function isMultipleOfIter(oldDate, today, counter) {
     return daysDiff % counter === 0;
 }
 
-const buildCalendarCards = async () => {
+const buildNextCCards = async () => {
+
     try {
         const info = await retrieveInfo();
+
         var calendarcards = new Array();
         var calendarviews = new Array();
 
-
-        for (let i = 0; i < 7; i++) {
+        for (let i = 0; i < 31; i++) {
             var reminderViews = new Array();
             var redViews = new Array();
             var blueViews = new Array();
@@ -101,28 +105,28 @@ const buildCalendarCards = async () => {
             if (dayContacts.length > 0) {
                 calendarviews.push(
                     <View
-                        className=" bg-white"
+                        className=" bg-white mt-4"
                     >
-                        <View className="pl-4 mt-4">
+                        <View className="pl-4">
                             <Text className="text-2xl">
-                                {i==0 ? "Today," : i== 1? "Tomorrow," : dayname +
-                                    String(new Date(today.getTime() + i * 24 * 60 * 60 * 1000)).substring(4, 10)}
+                                {i== 0 ? "Today," : dayname +
+                                    String(new Date(today.getTime() + i * 24 * 60 * 60 * 1000)).substring(4, 15)}
                             </Text>
                         </View>
                         {dayContacts.length > 1 ? (
-                            <ScrollView className='space-y-3 h-full bg-white'>
-                                {dayContacts.map(contact => (
-                                    <View key={contact.id} className="items-center pt-1 pb-3 rounded-md border-2 border-dotted bg-gray-100 mx-4 h-[28%] mt-4">
-                                        <Text className="text-2xl text-center">{contact.first + " " + contact.last}</Text>
-                                        <Text className="text-2xl text-center">
-                                            {contact.freqgen}
-                                        </Text>
-                                        <Text className="text-xl text-center">{contact.freqspec}</Text>
-                                    </View>
-                                ))}
-                            </ScrollView>
+                            <ScrollView className='space-y-3'>
+                            {dayContacts.map(contact => (
+                                <View key={contact.id} className="items-center pt-1 pb-3 rounded-md border-2 border-dotted bg-gray-100 mx-4 h-[28%] mt-4">
+                                    <Text className="text-2xl text-center">{contact.first + " " + contact.last}</Text>
+                                    <Text className="text-2xl text-center">
+                                        {contact.freqgen}
+                                    </Text>
+                                    <Text className="text-xl text-center">{contact.freqspec}</Text>
+                                </View>
+                            ))}
+                        </ScrollView>
                         ) : (
-                                <View key={dayContacts[0].id} className="items-center pt-1 pb-3 rounded-md border-2 border-dotted bg-gray-100 mx-4 mt-4">
+                            <View key={dayContacts[0].id} className="items-center pt-1 pb-3 rounded-md border-2 border-dotted bg-gray-100 mx-4 mt-4">
                                 <Text className="text-2xl">{dayContacts[0].first + " " + dayContacts[0].last}</Text>
                                 <Text className="text-2xl">
                                     {dayContacts[0].freqgen}
@@ -132,7 +136,7 @@ const buildCalendarCards = async () => {
                         )}
                     </View>
                 );
-            } else {
+            } else if (i==0) {
                 calendarviews.push(
                     <View
                         className=" bg-white mt-4"
@@ -163,25 +167,29 @@ const buildCalendarCards = async () => {
             for (let k = 0; k < greenViews.length; k++)
                 reminderViews.push(greenViews[k]);
 
-
+            
+            {
+                (i == 0 || reminderViews.length != 0) ?
                 calendarcards.push(
-                    <View className={ i == 0 ? 'h-28 w-20 bg-gray-200 rounded-xl border-2' : 'h-28 w-20 bg-gray-200 rounded-xl border-2'}>
-                        <View className='h-20'>
-                            <View className='flex-row h-7 bg-white rounded-t-xl w-full border-b-2'>
-                                <View className=' border-r-2'>
-                                    <Text className={new Date(today.getTime() + (i * 24 * 60 * 60 * 1000)).getDate() > 9? ' pl-0.5 pr-0.5 text-lg' : ' pl-2 pr-2 text-lg'}>
+                    <View className={'h-28 w-20 bg-gray-200 rounded-xl border-2'}>
+                            <View className='h-20'>
+                                <View className='flex-row h-7 bg-white rounded-t-xl w-full border-b-2'>
+                                    <View className=' border-r-2'>
+                                        <Text className={new Date(today.getTime() + (i * 24 * 60 * 60 * 1000)).getDate() > 9 ? ' pl-0.5 pr-0.5 text-lg' : ' pl-2 pr-2 text-lg'}>
                                             {new Date(today.getTime() + (i * 24 * 60 * 60 * 1000)).getDate()}
-                                    </Text>
-                                </View> 
-                                <View className=''>
-                                    {sdow == "Thur" ? <Text className='pl-1 pt-0.5 text-lg'>{sdow}</Text> : sdow == "Tues" ? <Text className='pl-1 pt-0.5 text-lg'>{sdow}</Text> : sdow == "Sat" ? <Text className='pl-4 pt-0.5 text-lg'>{sdow}</Text> : sdow == "Sun" ? <Text className='pl-2 pt-0.5 text-lg'>{sdow}</Text> : sdow == "Fri" ? <Text className='pl-3 pt-0.5 text-lg'>{sdow}</Text> : <Text className='pl-2 pt-0.5 text-lg'>{sdow}</Text>}
+                                        </Text>
+                                    </View>
+                                    <View className=''>
+                                        {sdow == "Thur" ? <Text className='pl-1 pt-0.5 text-lg'>{sdow}</Text> : sdow == "Tues" ? <Text className='pl-1 pt-0.5 text-lg'>{sdow}</Text> : sdow == "Sat" ? <Text className='pl-4 pt-0.5 text-lg'>{sdow}</Text> : sdow == "Sun" ? <Text className='pl-2 pt-0.5 text-lg'>{sdow}</Text> : sdow == "Fri" ? <Text className='pl-3 pt-0.5 text-lg'>{sdow}</Text> : <Text className='pl-2 pt-0.5 text-lg'>{sdow}</Text>}
+                                    </View>
+                                </View>
+                                <View>
+                                    {reminderViews.length != 0 ? reminderViews : <View className='bg-black'></View>}
                                 </View>
                             </View>
-                            <View>
-                                {reminderViews.length != 0 ? reminderViews : <View className='bg-black'></View>}
-                            </View>
-                        </View>
-                    </View>);
+                        </View>) :
+                    counter++
+            }
         }
             return [calendarcards, calendarviews];
         } catch (error) {
@@ -190,6 +198,6 @@ const buildCalendarCards = async () => {
         }
 }
 
-export default buildCalendarCards;
+export default buildNextCCards;
 
 

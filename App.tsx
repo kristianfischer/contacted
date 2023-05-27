@@ -14,6 +14,8 @@ type UserState = User | undefined;
 
 export default function App() {
 
+
+
   const [user, setUser] = useState<UserState>(undefined);
   const [authChecked, setAuthChecked] = useState(false);
 
