@@ -1,21 +1,42 @@
-import { Text, TextInput, View, ScrollView, TouchableOpacity, Pressable } from 'react-native';
+import { Text, TextInput, View, ScrollView, TouchableOpacity, Pressable, Image } from 'react-native';
 import React, { useState } from "react";
 import { Zocial } from '@expo/vector-icons'; 
 import { Octicons, Feather } from '@expo/vector-icons'; 
 import { MaterialIcons } from '@expo/vector-icons'; 
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { deleteDoc, doc, setDoc, getFirestore } from "firebase/firestore";
+import * as ImagePicker from 'expo-image-picker';
+import { getAuth } from "firebase/auth";
 
 const db = getFirestore();
+const today = new Date();
 
 const AddContact = (props) => {
 
+    const [image, setImage] = useState(props.contact.imagepath);
+
+    const pickImage = async () => {
+        // No permissions request is necessary for launching the image library
+        let result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.All,
+        allowsEditing: true,
+        aspect: [4, 3],
+        quality: 1,
+        });
+
+        if (!result.canceled) {
+        setImage(result.assets[0].uri);
+        }
+    };
+
     const [edit, setEdit] = useState(false);
     const [firstname, setFirst] = useState(props.contact.first);
+    const [lastd, setLastd] = useState(props.contact.lastdate);
+    const [lastm, setLastm] = useState(props.contact.lastm);
     const [lastname, setLast] = useState(props.contact.last);
     const [number1, setNumber1] = useState(props.contact.number.substring(0,3));
-    const [number2, setNumber2] = useState(props.contact.number.substring(4,7));
-    const [number3, setNumber3] = useState(props.contact.number.substring(8,12));
+    const [number2, setNumber2] = useState(props.contact.number.substring(3,6));
+    const [number3, setNumber3] = useState(props.contact.number.substring(6,10));
     const [email, setEmail] = useState(props.contact.email);
     const [insta, setInsta] = useState(props.contact.insta);
     const [snap, setSnap] = useState(props.contact.snap);
@@ -27,23 +48,26 @@ const AddContact = (props) => {
 
     const [iter, setIter] = useState(props.contact.iterative);
 
-    function sendError() {
-        return console.log("error");
-    }
-
 
     const deleteCon = async () => {
-        await deleteDoc(doc(db, "Contacts", props.contact.last + ", " + props.contact.first));
+        await deleteDoc(doc(db, "Users", getAuth().currentUser.uid, "Contacts", props.contact.last + ", " + props.contact.first));
     }
 
     const addtobase = async () => {
-            
+        var newdate;
+        if (unit == "Days") {
+            newdate = new Date(today.getTime() - (parseInt(duration) * 24 * 60 * 60 * 1000));
+        } else if (unit == "Months") {
+            newdate = new Date(today.getFullYear() - Math.floor(parseInt(duration) / 12), today.getMonth() - (parseInt(duration) % 12), today.getDate());
+        } else if (unit == "Years") {
+            newdate = new Date(today.getFullYear() - parseInt(duration), today.getMonth(), today.getDate());
+        }
 
         try {
-            const docRef = await setDoc(doc(db, "Contacts", props.contact.last + ", " + props.contact.first), {
+            const docRef = await setDoc(doc(db, "Users", getAuth().currentUser.uid, "Contacts", props.contact.last + ", " + props.contact.first), {
                 first: firstname,
                 last: lastname,
-                number: number1.concat("-", number2, "-", number3),
+                number: number1.concat(number2, number3),
                 email: email,
                 insta: insta,
                 snap: snap,
@@ -52,10 +76,13 @@ const AddContact = (props) => {
                 lor: duration,
                 freqgen: choosegen,
                 freqspec: choosespec,
-                metdate: props.contact.metdate,
+                metdate: String(newdate).substring(0, 15),
                 startdate: props.contact.startdate,
                 iterative: String(iter),
-                color: relation == "Profesional" ? "bg-orange-200" : relation == "Friend" ? "bg-yellow-100" : relation == "Family" ? "bg-pink-200" : "bg-gray-100"
+                imagepath: image,
+                lastdate: props.contact.lastdate,
+                lastmess: props.contact.lastmess,
+                updated: "y"
 
             });  
             } catch (e) {
@@ -78,8 +105,8 @@ const AddContact = (props) => {
                     
 
                     <View className='flex-row'>    
-                        <Text className='text-3xl text-start ml-3'>
-                            View Contact
+                        <Text className='text-3xl text-start ml-5 w-[57%]'>
+                            { edit ? "Edit Contact" : "View Contact"}
                         </Text>
                         <TouchableOpacity
                             className='mt-1 pl-14'
@@ -98,7 +125,8 @@ const AddContact = (props) => {
                         </TouchableOpacity>
                         <TouchableOpacity
                             className='pt-1 pl-5'
-                            onPress={() => { deleteCon() }}>
+                            onPress={() => {
+                                deleteCon()}}>
                             <Octicons
                                 name="trash"
                                 size={30}
@@ -108,7 +136,7 @@ const AddContact = (props) => {
                     </View>
 
 
-                    <View className={relation == "Professional"?'flex-row w-full bg-orange-200 rounded-lg border-2 mt-3' : relation == "Friend" ? 'flex-row w-full bg-yellow-100 rounded-lg border-2 mt-3' : relation == "Family" ? 'flex-row w-full bg-pink-200 rounded-lg border-2 mt-3' : 'flex-row w-full bg-gray-100 rounded-lg border-2 mt-3'}>
+                    <View className={'flex-row w-full bg-gray-100 rounded-lg border-2 mt-3'}>
                         <View className={'flex-col w-full pl-4 w-[75%]'}>
                             <TextInput
                                 editable={edit}
@@ -130,13 +158,16 @@ const AddContact = (props) => {
                             </TextInput>
                         </View>
                         <TouchableOpacity
-                            className='pt-2'
-                            disabled={!edit}>
-                            <MaterialIcons
-                                name="account-circle"
-                                size={80}
-                                color = "black">
-                            </MaterialIcons>
+                            disabled={!edit}
+                            className={image == null ?'pt-2':'pt-3 pl-1'}
+                            onPress={pickImage}>
+                            {image == null ?
+                                <MaterialIcons
+                                    name="account-circle"
+                                    size={80}
+                                    color="black">
+                                </MaterialIcons> :
+                                <Image className='border-2' source={{ uri: image }} style={{ width: 70, height: 70, borderRadius: 35}} />}
                         </TouchableOpacity>
                     </View>
 
@@ -149,7 +180,7 @@ const AddContact = (props) => {
                         </Text>
                     </View>
 
-                    <View className={relation == "Professional"?'flex-col w-full space-y-5 bg-orange-200 rounded-lg border-2' : relation == "Friend" ? 'flex-col w-full space-y-5 bg-yellow-100 rounded-lg border-2' : relation == "Family" ? 'flex-col w-full space-y-5 bg-pink-200 rounded-lg border-2' : 'flex-col w-full space-y-5 bg-gray-100 rounded-lg border-2'}>
+                    <View className={'flex-col w-full space-y-5 bg-gray-100 rounded-lg border-2'}>
                         <View className='flex-row pt-3 space-x-12 pl-5'>
                             <Octicons
                                 name="comment-discussion"
@@ -258,7 +289,7 @@ const AddContact = (props) => {
                     </View>
 
 
-                    <View className={relation == "Professional"?'flex-col w-full space-y-6 px-8 mt-4 pt-4 pb-3 mb-8 border-2 rounded-lg bg-orange-200' : relation == "Friend" ? 'flex-col w-full space-y-6 px-8 mt-4 pt-4 pb-3 mb-8 border-2 rounded-lg bg-yellow-100' : relation == "Family" ? 'flex-col w-full space-y-6 px-8 mt-4 pt-4 pb-3 mb-8 border-2 rounded-lg bg-pink-200' : 'flex-col w-full space-y-6 px-8 mt-4 pt-4 pb-3 mb-8 border-2 rounded-lg bg-gray-100'}>
+                    <View className={'flex-col w-full space-y-6 px-8 mt-4 pt-4 pb-3 mb-8 border-2 rounded-lg bg-gray-100'}>
 
                         <View className='flex-row space-x-9'>
                             <Pressable
@@ -344,7 +375,7 @@ const AddContact = (props) => {
                     </View>
 
                     
-                    <View className={relation == "Professional"?'flex-col w-full space-y-6 px-4 mt-4 pt-2 border-2 rounded-lg bg-orange-200' : relation == "Friend" ? 'flex-col w-full space-y-6 px-4 mt-4 pt-2 border-2 rounded-lg bg-yellow-100' : relation == "Family" ? 'flex-col w-full space-y-6 px-4 mt-4 pt-2 border-2 rounded-lg bg-pink-200' : 'flex-col w-full space-y-6 px-4 mt-4 pt-2 border-2 rounded-lg bg-gray-100'}>
+                    <View className={'flex-col w-full space-y-6 px-4 mt-4 pt-2 border-2 rounded-lg bg-gray-100'}>
                         <Text
                             className='w-full h-7 pb-2 text-center text-lg text-black italic'>
                             How often do you want to reach out?

@@ -1,20 +1,34 @@
 import React, { useState } from "react";
 import { Text, SafeAreaView, TextInput, TouchableOpacity, Pressable, View } from 'react-native';
-import { getAuth, signInWithEmailAndPassword, User, createUserWithEmailAndPassword } from "firebase/auth";
-const Login = ({setUser = (user: User) => {}}) => {
+import { getAuth, signInWithEmailAndPassword, User, createUserWithEmailAndPassword, onAuthStateChanged } from "firebase/auth";
+import { collection, addDoc, doc, setDoc, getFirestore } from "firebase/firestore";
+
+
+
+
+const Login = ({ setUser = (user: User) => { } }) => {
 
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
 
-    
 
-    
+    const db = getFirestore();
+
 
     const SignUp = async () => {
         const auth = getAuth();
         createUserWithEmailAndPassword(auth, email, password)
             .then((userCredential) => {
                 setUser(userCredential.user);
+                try {
+                    const docRef = setDoc(doc(db, "Users", userCredential.user.uid), {
+                        email: email,
+                        password: password,
+                        id: userCredential.user.uid
+                    });  
+                } catch (e) {
+                console.error("Error adding document: ", e);
+            }
             })
             .catch((error) => {
                 const errorCode = error.code;

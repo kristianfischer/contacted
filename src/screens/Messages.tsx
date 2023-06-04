@@ -2,27 +2,29 @@ import { ScrollView, View, Text, TouchableOpacity } from 'react-native';
 import React, { useState } from "react";
 import { Octicons } from '@expo/vector-icons';
 import DraftMess from "../components/homepage/DraftMess";
-import { useNavigation } from '@react-navigation/native';
-import AccBanner from '../components/homepage/AccBanner';
 
 
 const Messages = ({ }) => {
 
-    const navigation = useNavigation();
-
-    function handleReturn() {
-        navigation.goBack();
-    }
-
     return (
-        <View className="flex flex-1 justify-start bg-white">
-            <Text className='text-start text-2xl ml-2'>
-                    Messages
-            </Text>
-            <View className='h-[50%] w-full items-center'>
+        <View className="flex flex-1 justify-start bg-white pt-16">
+            <View className='flex-row'>
+                <Text className='text-start text-3xl ml-6 pb-3'>
+                        Messages
+                </Text>
+                <TouchableOpacity className='items-end w-[55%]'>
+                    <Octicons
+                        name="light-bulb"
+                        size={30}
+                        color = {'black'}>
+                    </Octicons>
+                </TouchableOpacity>
+                
+            </View>
+            <View className='h-[30%] w-full items-center'>
                 <ScrollView>
-                    <Text className='mt-10'>
-                        No Messages? Add contacts to begin reaching out!
+                    <Text className='mt-4'>
+                        Reach out to some suggestions below!
                     </Text>
                 </ScrollView>
             </View>

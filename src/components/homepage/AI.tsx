@@ -1,26 +1,34 @@
-import { Text, TouchableOpacity, TextInput, View, Pressable, Image } from 'react-native';
+import { Text, TouchableOpacity, TextInput, View } from 'react-native';
 import React, { useState } from "react";
 import { Octicons } from '@expo/vector-icons'; 
-import { collection, addDoc, getFirestore } from "firebase/firestore";
+import { doc, setDoc, getFirestore } from "firebase/firestore";
+import * as Clipboard from 'expo-clipboard';
 
 const db = getFirestore();
 
 const AI = () => {
 
-    const addtobase = async (first) => {
-        try {
-            // const docRef = await addDoc(collection(db, "Generated Messages"), {
-            //     message: first
-            // });
-        } catch (e) {
-            console.error("Error adding document: ", e);
+    const [typedprompt, setTypedPrompt] = useState("")
+    const [response, setResponse] = useState("")
+
+    const addtobase = async () => {
+        if (typedprompt != "") {
+            try {
+                const docRef = await setDoc(doc(db, "Generated Messages", typedprompt), {
+                    message: typedprompt
+                });
+                console.log("done")
+            } catch (e) {
+                console.error("Error adding document: ", e);
+            }
         }
     }
 
-    const [typedprompt, setTypedPrompt] = useState("")
+    
 
     return (
-        <View className='w-full bg-white h-full pt-4'>
+        <View className='w-full bg-white h-[27%]'>
+            <Text className='pl-4 text-2xl pt-3 font-semibold'>Generate Message</Text>
             <View className='flex-row pl-20'>
                 <View className='flex-row'>
                     <View className='pt-4'>
@@ -39,7 +47,7 @@ const AI = () => {
                         </TextInput>
                     </View>
                     <TouchableOpacity className='pt-5'
-                        onPress={() => { addtobase(typedprompt) }}>
+                        onPress={() => { addtobase() }}>
                         <Octicons
                             name="check-circle"
                             size={25}
@@ -50,9 +58,10 @@ const AI = () => {
             </View>
             <View className='items-center'>
                 <TouchableOpacity
-                    className="h-40 m-1 border-2 w-fit rounded-xl text-start pl-2 pt-2 bg-gray-100">
+                    onPress={() => { response != "" ? Clipboard.setString(response) : null }}
+                    className="h-28 m-1 border-2 w-[80%] rounded-xl text-start pl-2 pt-2 bg-gray-100">
                     <Text className='text-gray-400'>
-                        Your response will load here. Touch the message to copy!
+                        {response == ""? "Your response will load here. Touch the message to copy!" : response}
                     </Text>
                 </TouchableOpacity>
             </View>

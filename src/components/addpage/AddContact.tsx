@@ -1,22 +1,39 @@
-import { Text, TextInput, View, ScrollView, TouchableOpacity, Pressable } from 'react-native';
+import { Text, TextInput, View, ScrollView, TouchableOpacity, Pressable, Image } from 'react-native';
 import React, { useState } from "react";
 import { Zocial } from '@expo/vector-icons'; 
 import { Octicons } from '@expo/vector-icons'; 
 import { MaterialIcons } from '@expo/vector-icons'; 
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { collection, addDoc, doc, setDoc, getFirestore } from "firebase/firestore";
-import FrequencyCard from '../components/addpage/FrequencyCard';
-import RelationshipCard from '../components/addpage/RelationshipCard';
-import ContactHead from '../components/addpage/ContactHead';
-import InformationCard from '../components/addpage/InformationCard';
+import { getAuth } from "firebase/auth";
+import * as ImagePicker from 'expo-image-picker';
+import FrequencyCard from './FrequencyCard';
+import RelationshipCard from './RelationshipCard';
+import ContactHead from './ContactHead';
+import InformationCard from './InformationCard';
 import { useNavigation } from '@react-navigation/native';
-import ContactScreen from './ContactScreen';
+import ContactScreen from '../../screens/ContactScreen';
 
-//(firstname != "" && lastname != "" && (prof == true || friend == true || fam == true) && ans != "") ?  handleAddContact()  : sendError() }}>
 
 const db = getFirestore();
 
 const AddContact = ({ }) => {
+
+    const [image, setImage] = useState(null);
+
+    const pickImage = async () => {
+        // No permissions request is necessary for launching the image library
+        let result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.All,
+        allowsEditing: true,
+        aspect: [4, 3],
+        quality: 1,
+        });
+
+        if (!result.canceled) {
+        setImage(result.assets[0].uri);
+        }
+    };
 
     const today = new Date();
 
@@ -174,12 +191,11 @@ const AddContact = ({ }) => {
             newdate = new Date(today.getFullYear() - parseInt(duration), today.getMonth(), today.getDate());
         }
             
-
         try {
-            const docRef = await setDoc(doc(db, "Contacts", lastname + ", " + firstname), {
+            const docRef = await setDoc(doc(db, "Users", getAuth().currentUser.uid, "Contacts", lastname + ", " + firstname), {
                 first: firstname,
                 last: lastname,
-                number: number1.concat("-", number2, "-", number3),
+                number: number1.concat(number2, number3),
                 email: email,
                 insta: insta,
                 snap: snap,
@@ -191,7 +207,10 @@ const AddContact = ({ }) => {
                 metdate: String(newdate).substring(0, 15),
                 startdate: String(today),
                 iterative: String(iter),
-                color: prof == true ? "bg-orange-200" : friend == true ? "bg-yellow-100" : fam == true ? "bg-pink-200" : "bg-gray-100"
+                imagepath: image,
+                lastdate: " ",
+                lastmess: " ",
+                updated: "y"
 
             });  
             } catch (e) {
@@ -226,6 +245,7 @@ const AddContact = ({ }) => {
         setOneay(false);
         setBiy(false);
         setIter(0)
+        setImage(null);
     }
 
 
@@ -257,9 +277,10 @@ const AddContact = ({ }) => {
                     </View>
 
 
-                    <View className={prof==true?'flex-row w-full bg-orange-200 rounded-lg border-2 mt-3' : friend == true ? 'flex-row w-full bg-yellow-100 rounded-lg border-2 mt-3' : fam == true ? 'flex-row w-full bg-pink-200 rounded-lg border-2 mt-3' : 'flex-row w-full bg-gray-100 rounded-lg border-2 mt-3'}>
+                    <View className={'flex-row w-full bg-gray-100 rounded-lg border-2 mt-3'}>
                         <View className={'flex-col w-full pl-4 w-[75%]'}>
                             <TextInput
+                                autoCorrect={false}
                                 className= 'h-12 text-start text-xl'
                                 onChangeText={setFirst}
                                 value={firstname}
@@ -267,6 +288,7 @@ const AddContact = ({ }) => {
                             >
                             </TextInput>
                             <TextInput
+                                autoCorrect={false}
                                 className='h-12 text-start text-xl pb-3'
                                 onChangeText={setLast}
                                 value={lastname}
@@ -275,12 +297,15 @@ const AddContact = ({ }) => {
                             </TextInput>
                         </View>
                         <TouchableOpacity
-                            className='pt-2'>
-                            <MaterialIcons
-                                name="account-circle"
-                                size={80}
-                                color = "black">
-                            </MaterialIcons>
+                            className={image == null ?'pt-2':'pt-3 pl-1'}
+                            onPress={pickImage}>
+                            {image == null ?
+                                <MaterialIcons
+                                    name="account-circle"
+                                    size={80}
+                                    color="black">
+                                </MaterialIcons> :
+                                <Image className = "border-2" source={{ uri: image }} style={{ width: 70, height: 70, borderRadius: 35}} />}
                         </TouchableOpacity>
                     </View>
 
@@ -293,7 +318,7 @@ const AddContact = ({ }) => {
                         </Text>
                     </View>
 
-                    <View className={prof==true?'flex-col w-full space-y-5 bg-orange-200 rounded-lg border-2' : friend == true ? 'flex-col w-full space-y-5 bg-yellow-100 rounded-lg border-2' : fam == true ? 'flex-col w-full space-y-5 bg-pink-200 rounded-lg border-2' : 'flex-col w-full space-y-5 bg-gray-100 rounded-lg border-2'}>
+                    <View className={'flex-col w-full space-y-5 bg-gray-100 rounded-lg border-2'}>
                         <View className='flex-row pt-3 space-x-12 pl-5'>
                             <Octicons
                                 name="comment-discussion"
@@ -303,6 +328,8 @@ const AddContact = ({ }) => {
                             </Octicons>
                             <View className='flex-row space-x-1'>
                                 <TextInput
+                                    maxLength= {3}
+                                    autoCorrect={false}
                                     className='w-[22%] border-b-2 h-7 pb-2 text-center'
                                     onChangeText={setNumber1}
                                     value={number1}
@@ -312,6 +339,8 @@ const AddContact = ({ }) => {
                                 </TextInput>
                                 <Text className='text-lg'>-</Text>
                                 <TextInput
+                                    maxLength= {3}
+                                    autoCorrect={false}
                                     className='w-[22%] border-b-2 h-7 pb-2 text-center'
                                     onChangeText={setNumber2}
                                     value={number2}
@@ -321,6 +350,8 @@ const AddContact = ({ }) => {
                                 </TextInput>
                                 <Text className='text-lg'>-</Text>
                                 <TextInput
+                                    maxLength= {4}
+                                    autoCorrect={false}
                                     className='w-[27%] border-b-2 h-7 pb-2 text-center'
                                     onChangeText={setNumber3}
                                     value={number3}
@@ -338,6 +369,7 @@ const AddContact = ({ }) => {
                             >
                             </Octicons>
                             <TextInput
+                                autoCorrect={false}
                                 className='w-[60%] border-b-2 h-7 pb-2 text-start'
                                 onChangeText={setEmail}
                                 value={email}
@@ -354,6 +386,7 @@ const AddContact = ({ }) => {
                             >
                             </Zocial>
                             <TextInput
+                                autoCorrect={false}
                                 className='w-[60%] border-b-2 h-7 pb-2 text-start'
                                 onChangeText={setInsta}
                                 value={insta}
@@ -370,6 +403,7 @@ const AddContact = ({ }) => {
                             >
                             </MaterialCommunityIcons>
                             <TextInput
+                                autoCorrect={false}
                                 className='w-[60%] border-b-2 h-7 pb-2 text-start'
                                 onChangeText={setSnap}
                                 value={snap}
@@ -390,7 +424,7 @@ const AddContact = ({ }) => {
                     </View>
 
 
-                    <View className={prof==true?'flex-col w-full space-y-6 px-8 mt-4 pt-4 pb-3 mb-8 border-2 rounded-lg bg-orange-200' : friend == true ? 'flex-col w-full space-y-6 px-8 mt-4 pt-4 pb-3 mb-8 border-2 rounded-lg bg-yellow-100' : fam == true ? 'flex-col w-full space-y-6 px-8 mt-4 pt-4 pb-3 mb-8 border-2 rounded-lg bg-pink-200' : 'flex-col w-full space-y-6 px-8 mt-4 pt-4 pb-3 mb-8 border-2 rounded-lg bg-gray-100'}>
+                    <View className={'flex-col w-full space-y-6 px-8 mt-4 pt-4 pb-3 mb-8 border-2 rounded-lg bg-gray-100'}>
 
                         <View className='flex-row space-x-9'>
                             <Pressable
@@ -472,7 +506,7 @@ const AddContact = ({ }) => {
                     </View>
 
                     
-                    <View className={prof==true?'flex-col w-full space-y-6 px-4 mt-4 pt-2 border-2 rounded-lg bg-orange-200' : friend == true ? 'flex-col w-full space-y-6 px-4 mt-4 pt-2 border-2 rounded-lg bg-yellow-100' : fam == true ? 'flex-col w-full space-y-6 px-4 mt-4 pt-2 border-2 rounded-lg bg-pink-200' : 'flex-col w-full space-y-6 px-4 mt-4 pt-2 border-2 rounded-lg bg-gray-100'}>
+                    <View className={'flex-col w-full space-y-6 px-4 mt-4 pt-2 border-2 rounded-lg bg-gray-100'}>
                         <Text
                             className='w-full h-7 pb-2 text-center text-lg text-black italic'>
                             How often do you want to reach out?

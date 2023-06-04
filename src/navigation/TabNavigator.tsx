@@ -3,7 +3,6 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import Home from "../screens/Home";
 import { MyTabBar } from "./TabBar";
 import Recommendations from "../screens/Recommendations";
-import AddContact from "../screens/AddContact";
 import ContactScreen from "../screens/ContactScreen";
 
 
@@ -24,7 +23,6 @@ const TabNavigator = () => {
       <Tab.Screen name="Add Contact" component={ContactScreen} options={{
         tabBarLabel: 'Add Contact',
       }} />
-      
       <Tab.Screen name="Reccomendations" component={Recommendations} options={{
         tabBarLabel: 'Reccomendations',
         }} />

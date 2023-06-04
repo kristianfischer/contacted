@@ -41,14 +41,15 @@ export function MyTabBar({ state, descriptors, navigation }) {
 
         return (
           <TouchableOpacity
-            className='flex pl-14 mb-3'
+            className='flex space-x-14 mb-3'
             onPress={onPress}
             onLongPress={onLongPress}
             style={{ flex: 1 }}
             key={route.name}
           >
+            <View className='flex-col items-center'>
             <Octicons  
-              name={route.name == "Contacts" ? "people" : route.name == "Add Contact" ? "person-add" : "light-bulb"}
+              name={route.name == "Contacts" ? "checklist" : route.name == "Add Contact" ? "people" : "light-bulb"}
               size={25} 
               color="black" 
               />
@@ -56,7 +57,8 @@ export function MyTabBar({ state, descriptors, navigation }) {
               name= "dash"
               size={25} 
               color= {isFocused ? "black" : "white"} 
-            />
+              />
+              </View>
           </TouchableOpacity>
         );
       })}

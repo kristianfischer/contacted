@@ -1,12 +1,13 @@
-import { Text, View, TouchableOpacity } from 'react-native';
+import { Text, View, TouchableOpacity, Image } from 'react-native';
 import { getDocs, collection, getFirestore } from "firebase/firestore"; 
 import React, { useState, useEffect } from "react";
+import { getAuth } from "firebase/auth";
 
 const db = getFirestore();
 
 const getContacts = async () => {
     const contactList = [];
-    const querySnapshot = await getDocs(collection(db, "Contacts"));
+    const querySnapshot = await getDocs(collection(db, "Users", getAuth().currentUser.uid, "Contacts"));
     querySnapshot.forEach((doc) => {
         contactList.push(doc.data());
     });
@@ -27,41 +28,80 @@ const buildContactCards = async (onCardPress) => {
     try {
         const contacts = await retrieveContacts();
         const contactCards = [];
+        const profarr = [];
+        const friendarr = [];
+        const famarr = [];
+        const filteredContactCards = [];
         const conlength = contacts.length;
 
         for (let i = 0; i < conlength; i++) {
             contactCards.push(
                 <TouchableOpacity
                     onPress={() => onCardPress(contacts[i])}
-                    key={"contact: " + (i + 1)}
-                    className={contacts[i].color == "bg-orange-200" ? 'rounded-md h-14 bg-orange-200 space-x-3 border-2' : contacts[i].color == "bg-pink-200" ? 'rounded-md h-14 bg-pink-200 space-x-3 border-2' : 'rounded-md h-14 bg-yellow-100 space-x-3 border-2'}>
-                    <View className='flex-row w-full'>
-                        <View className='items-start pl-3 pt-1 w-[50%]'>
-                            <Text>
+                    key={contacts[i].first + " " + contacts[i].last}
+                    className={'h-14  bg-white space-x-3 border-b'}>
+                    <View className='flex-row'>
+                        <Image className="h-full w-full border-2 mt-1 ml-1" source={{ uri: contacts[i].imagepath }} style={{ width: 47, height: 47, borderRadius: 23.5 }}></Image>
+                        <View className='flex-col'>
+                            <Text className='text-lg font-semibold pt-5 w-52 pl-2'>
                                 {contacts[i].first + " " + contacts[i].last}
                             </Text>
                         </View>
-                        <View className='pt-1 items-end w-[50%] pr-2'>
-                            <Text>
-                                {contacts[i].number}
-                            </Text>
-                        </View>
-                    </View>
-                    <View className={contacts[i].relation != "Professional" ? 'flex-row': 'flex-row space-x-3'}>
-                        <Text className='pt-1 text-gray-400'>
-                            {contacts[i].relation}
-                        </Text>
-                        <Text className={contacts[i].relation != "Professional" ? 'pt-1 mr- text-gray-400 pl-56' :  'pt-1 mr- text-gray-400 pl-44'}>
-                            {contacts[i].freqgen}
-                        </Text>
+                        {contacts[i].updated == "y" ?
+                        <View className='items-end w-[30%]'>
+                            <View className='pt-1'>
+                                <Text className=''>{contacts[i].freqspec}</Text>
+                            </View>
+                            <View className='pt-3 pl-2'>
+                                <Text className='text-gray-500'>
+                                    {contacts[i].relation}
+                                </Text>
+                            </View>
+                        </View> : 
+                        <View className='items-end w-[30%]'>
+                            <View className='flex-row pt-7 pl-2'>
+                                <View className='rounded-xl h-5 w-5 bg-yellow-400 border-2'><Text className='ml-1.5'>!</Text></View>  
+                                <Text className='pl-2 pt-1'>
+                                    Update Contact
+                                </Text>
+                            </View>
+                        </View>}
                     </View>
                 </TouchableOpacity>
-                );
-        }
-        
-        
+            );
 
-        return contactCards;
+            
+            if (contacts[i].relation == "Professional")
+                profarr.push(contactCards[i]);
+            else if (contacts[i].relation == "Friend")
+                friendarr.push(contactCards[i]);
+            else if (contacts[i].relation == "Family")
+                famarr.push(contactCards[i]);
+        }
+
+        for (let k = 0; k < famarr.length; k++)
+            filteredContactCards.push(famarr[k]);
+        for (let k = 0; k < profarr.length; k++)
+            filteredContactCards.push(profarr[k]);
+        for (let k = 0; k < friendarr.length; k++)
+            filteredContactCards.push(friendarr[k]);
+
+        if (conlength < 10) {
+            for (let i = 0; i < 10 - conlength; i++) {
+                contactCards.push(<View
+                    key={"hi" + i}
+                    className={' h-14 bg-white space-x-3 border-b' }>
+                </View>);
+                filteredContactCards.push(<View
+                    key={"hi" + i}
+                    className={' h-14 bg-white space-x-3 border-b' }>
+                </View>);
+            }
+        }
+
+            
+
+        return [contactCards, filteredContactCards];
     } catch (error) {
         console.error('Error building contact cards:', error);
         return [];
