@@ -41,7 +41,7 @@ const buildContactCards = async (onCardPress) => {
                     key={contacts[i].first + " " + contacts[i].last}
                     className={'h-14  bg-white space-x-3 border-b'}>
                     <View className='flex-row'>
-                        <Image className="h-full w-full border-2 mt-1 ml-1" source={{ uri: contacts[i].imagepath }} style={{ width: 47, height: 47, borderRadius: 23.5 }}></Image>
+                        <Image className="h-full w-full border mt-1 ml-1" source={{ uri: contacts[i].imagepath }} style={{ width: 47, height: 47, borderRadius: 23.5 }}></Image>
                         <View className='flex-col'>
                             <Text className='text-lg font-semibold pt-5 w-52 pl-2'>
                                 {contacts[i].first + " " + contacts[i].last}

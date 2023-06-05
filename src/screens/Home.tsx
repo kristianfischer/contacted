@@ -13,7 +13,7 @@ const Home = ({ }) => {
     return (
         <View className="flex flex-1 items-end justify-start bg-white">
             < AccBanner />
-            < Calendar />
+                < Calendar />
         </View>
     );
 };

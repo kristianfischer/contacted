@@ -4,6 +4,8 @@ import * as Contacts from 'expo-contacts';
 import { Octicons, Feather } from '@expo/vector-icons'; 
 import { collection, addDoc, doc, setDoc, getFirestore } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
+import account from "../../../assets/acount.png";
+
 
 const db = getFirestore();
 
@@ -49,7 +51,7 @@ const buildImportCards = async () => {
                     metdate: "",
                     startdate: String(today),
                     iterative: "",
-                    imagepath: contacts[index].image != null ? contacts[index].image.uri : "",
+                    imagepath: contacts[index].image != null ? contacts[index].image.uri : Image.resolveAssetSource(account).uri,
                     lastdate: " ",
                     lastmess: " ",
                     updated: "n"
@@ -66,15 +68,9 @@ const buildImportCards = async () => {
                     key={contacts[i].firstName + " " + contacts[i].lastName}
                     className={'h-14  bg-white space-x-3 border-b'}>
                     <View className='flex-row'>
-                        {contacts[i].imageAvailable == true ? <Image className="h-full w-full border-2 mt-1 ml-1" source={{ uri: contacts[i].image.uri }} style={{ width: 47, height: 47, borderRadius: 23.5 }}></Image>
+                        {contacts[i].imageAvailable == true ? <Image className="h-full w-full border mt-1 ml-1" source={{ uri: contacts[i].image.uri }} style={{ width: 47, height: 47, borderRadius: 23.5 }}></Image>
                             :
-                            <View className='mt-1 ml-1'>
-                                <Octicons
-                                    name="feed-person"
-                                    size={45}
-                                    color={'black'}>
-                                </Octicons>
-                            </View>}
+                            <Image className="h-full w-full border mt-1 ml-1" source={{ uri: Image.resolveAssetSource(account).uri }} style={{ width: 47, height: 47, borderRadius: 23.5 }}></Image>}
                         <View className='flex-col w-[60%]'>
                             <Text className='text-lg font-semibold pt-5 w-56 pl-2'>
                                 {contacts[i].lastName != null ?  contacts[i].firstName + " " + contacts[i].lastName : contacts[i].firstName + " " }

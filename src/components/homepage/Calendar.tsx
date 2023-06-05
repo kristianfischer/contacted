@@ -6,27 +6,16 @@ import React, { useState, useEffect } from "react";
 import DraftMess from './DraftMess';
 import AI from './AI';
 import LastMess from './LastMess';
-import * as Notifications from 'expo-notifications';
+import { registerNotificationTask, NOTIFICATION_TASK } from '../../NotificationTask';
+import { getAuth, User } from "firebase/auth";
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
 
 
 
 const Calendar = ({ }) => {
 
-    const sendNotif = async () => {
-        await Notifications.scheduleNotificationAsync({
-        content: {
-            title: "Title",
-            body: "body",
-            //data: { data: "data goes here" }
-        },
-        trigger: {
-            
-        }
-        });
-    }
-        
-    
-
+    const [currentUser, setCurrentUser] = useState(null);
     const [calendarCards, setCalendarCards] = useState([]);
     const [ncalendarCards, setNCalendarCards] = useState([]);
     const [calendarProfile, setCalendarProfile] = useState([]);
@@ -36,6 +25,7 @@ const Calendar = ({ }) => {
     const [pressed, setPressed] = useState(false);
     const [contact, setContact] = useState(null);
     const [ai, setAI] = useState(false);
+    const [isAppOpened, setIsAppOpened] = useState(false);
     
     const touchpress = (contact) => {
         setPressed(true);
@@ -68,6 +58,11 @@ const Calendar = ({ }) => {
         };
 
         fetchCalendarCards();
+        setCurrentUser(getAuth().currentUser);
+
+      // Register the notification task with the currentUser
+        registerNotificationTask(currentUser);
+        
     }, []);
 
     const keyboard = useKeyboard();
@@ -94,6 +89,36 @@ const Calendar = ({ }) => {
             </TouchableOpacity>
         )
     } 
+
+    useEffect(() => {
+        const checkAndUpdateAppOpenedStatus = async () => {
+          // Get the current date as a string
+          const currentDate = new Date().toLocaleDateString();
+          
+          // Get the stored app opened status from AsyncStorage
+          const storedAppOpenedStatus = await AsyncStorage.getItem('appOpenedStatus');
+          
+          // Check if the stored date matches the current date
+          if (storedAppOpenedStatus !== currentDate) {
+            // If the dates don't match, update the app opened status to false
+            await AsyncStorage.setItem('appOpenedStatus', currentDate);
+            await AsyncStorage.setItem('isAppOpened', 'false');
+            setIsAppOpened(false);
+          } else {
+            // If the dates match, retrieve the stored isAppOpened value
+            const storedIsAppOpened = await AsyncStorage.getItem('isAppOpened');
+            setIsAppOpened(storedIsAppOpened === 'true');
+          }
+        };
+        
+        checkAndUpdateAppOpenedStatus();
+      }, []);
+      
+      const handleToggleAppOpened = async () => {
+        const newIsAppOpened = !isAppOpened;
+        await AsyncStorage.setItem('isAppOpened', newIsAppOpened.toString());
+        setIsAppOpened(newIsAppOpened);
+      };
 
     return (
         <View className='h-full w-full'>

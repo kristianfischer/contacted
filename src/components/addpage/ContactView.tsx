@@ -31,8 +31,6 @@ const AddContact = (props) => {
 
     const [edit, setEdit] = useState(false);
     const [firstname, setFirst] = useState(props.contact.first);
-    const [lastd, setLastd] = useState(props.contact.lastdate);
-    const [lastm, setLastm] = useState(props.contact.lastm);
     const [lastname, setLast] = useState(props.contact.last);
     const [number1, setNumber1] = useState(props.contact.number.substring(0,3));
     const [number2, setNumber2] = useState(props.contact.number.substring(3,6));
@@ -54,6 +52,7 @@ const AddContact = (props) => {
     }
 
     const addtobase = async () => {
+        deleteCon();
         var newdate;
         if (unit == "Days") {
             newdate = new Date(today.getTime() - (parseInt(duration) * 24 * 60 * 60 * 1000));
@@ -64,7 +63,7 @@ const AddContact = (props) => {
         }
 
         try {
-            const docRef = await setDoc(doc(db, "Users", getAuth().currentUser.uid, "Contacts", props.contact.last + ", " + props.contact.first), {
+            const docRef = await setDoc(doc(db, "Users", getAuth().currentUser.uid, "Contacts", firstname + ", " + lastname), {
                 first: firstname,
                 last: lastname,
                 number: number1.concat(number2, number3),
@@ -137,7 +136,7 @@ const AddContact = (props) => {
 
 
                     <View className={'flex-row w-full bg-gray-100 rounded-lg border-2 mt-3'}>
-                        <View className={'flex-col w-full pl-4 w-[75%]'}>
+                        <View className={'flex-col w-[75%] pl-4'}>
                             <TextInput
                                 editable={edit}
                                 selectTextOnFocus={edit}
@@ -293,6 +292,7 @@ const AddContact = (props) => {
 
                         <View className='flex-row space-x-9'>
                             <Pressable
+                                className='pl-3'
                                 disabled={!edit}
                                 onPress={() => { setRelation("Professional") }}>
                                 <Text
@@ -326,7 +326,7 @@ const AddContact = (props) => {
                                 <Pressable
                                     disabled={!edit}
                                     onPress={() => { setUnit("Days") }}
-                                    className='pl-2'>
+                                    className='pl-5'>
                                     <Text
                                         className={unit == "Days" ? 'text-black text-lg' : 'text-gray-400 text-lg'}>
                                             Days
@@ -382,6 +382,7 @@ const AddContact = (props) => {
                         </Text>
                         <View className='flex-row space-x-10 pl-6'>
                             <Pressable
+                                className='pl-3'
                                 disabled={!edit}
                                 onPress={() => { setGen("Weekly")}}>
                                 <Text
@@ -407,7 +408,7 @@ const AddContact = (props) => {
                             </Pressable>
                         </View>
                         {(choosegen == "Weekly") ? 
-                        <View className='flex-row space-x-2 pb-4'>
+                        <View className='flex-row space-x-5 pb-4'>
                             <Pressable
                                 disabled={!edit}
                                 className='' 
@@ -441,7 +442,7 @@ const AddContact = (props) => {
                                 </Text>
                             </Pressable>
                         </View> : (choosegen == "Monthly") ? 
-                        <View className='flex-row space-x-2 pb-4'>
+                        <View className='flex-row space-x-4 pb-4'>
                                     <Pressable
                                         disabled={!edit}
                                         onPress={() => {
@@ -473,7 +474,7 @@ const AddContact = (props) => {
                                 </Text>
                             </Pressable>
                         </View> : (choosegen == "Yearly") ? 
-                        <View className='flex-row space-x-1 pb-4'>
+                        <View className='flex-row space-x-3.5 pb-4'>
                                         <Pressable
                                             disabled={!edit}
                                             onPress={() => {
@@ -496,7 +497,7 @@ const AddContact = (props) => {
                             </Pressable>
                                         <Pressable
                                             disabled={!edit}
-                                className='mr-1'       
+                                className=''       
                                             onPress={() => {
                                                 setSpec("Bi-annually")
                                                 setIter(730)}}>

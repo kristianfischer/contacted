@@ -13,6 +13,8 @@ import ContactHead from './ContactHead';
 import InformationCard from './InformationCard';
 import { useNavigation } from '@react-navigation/native';
 import ContactScreen from '../../screens/ContactScreen';
+import account from "../../../assets/acount.png";
+
 
 
 const db = getFirestore();
@@ -278,7 +280,7 @@ const AddContact = ({ }) => {
 
 
                     <View className={'flex-row w-full bg-gray-100 rounded-lg border-2 mt-3'}>
-                        <View className={'flex-col w-full pl-4 w-[75%]'}>
+                        <View className={'flex-col pl-4 w-[75%]'}>
                             <TextInput
                                 autoCorrect={false}
                                 className= 'h-12 text-start text-xl'
@@ -300,11 +302,8 @@ const AddContact = ({ }) => {
                             className={image == null ?'pt-2':'pt-3 pl-1'}
                             onPress={pickImage}>
                             {image == null ?
-                                <MaterialIcons
-                                    name="account-circle"
-                                    size={80}
-                                    color="black">
-                                </MaterialIcons> :
+                                <Image className="h-full w-full border-2 mt-1 ml-1" source={{ uri: Image.resolveAssetSource(account).uri }} style={{ width: 70, height: 70, borderRadius: 35 }}></Image>
+                                                            :
                                 <Image className = "border-2" source={{ uri: image }} style={{ width: 70, height: 70, borderRadius: 35}} />}
                         </TouchableOpacity>
                     </View>
@@ -428,6 +427,7 @@ const AddContact = ({ }) => {
 
                         <View className='flex-row space-x-9'>
                             <Pressable
+                                className='pl-3'
                                 onPress={() => { Revertother("Professional") }}>
                                 <Text
                                     className={prof==true ? 'text-black text-lg' : 'text-gray-400 text-lg'}>
@@ -458,7 +458,7 @@ const AddContact = ({ }) => {
                                 <View className='flex-row space-x-10 pl-4 pt-6'>
                                 <Pressable
                                     onPress={() => { Revertother("Days") }}
-                                    className='pl-2'>
+                                    className='pl-5'>
                                     <Text
                                         className={days==true ? 'text-black text-lg' : 'text-gray-400 text-lg'}>
                                             Days
@@ -513,7 +513,7 @@ const AddContact = ({ }) => {
                         </Text>
                         <View className='flex-row space-x-10 pl-6'>
                             <Pressable
-                                
+                                className='pl-3'
                                 onPress={() => { Revertother("Weekly")}}>
                                 <Text
                                     className={wks==true ? 'text-black text-lg' : 'text-gray-400 text-lg'}>
@@ -536,7 +536,7 @@ const AddContact = ({ }) => {
                             </Pressable>
                         </View>
                         {(wks == true) ? 
-                        <View className='flex-row space-x-2 pb-4'>
+                        <View className='flex-row space-x-5 pb-4'>
                             <Pressable
                                 className='' 
                                 onPress={() => {  Revertother("Twice a week")}}>
@@ -560,7 +560,7 @@ const AddContact = ({ }) => {
                                 </Text>
                             </Pressable>
                         </View> : (mns == true) ? 
-                        <View className='flex-row space-x-2 pb-4'>
+                        <View className='flex-row space-x-4 pb-4'>
                             <Pressable
                                 onPress={() => { Revertother("Once a month")}}>
                                 <Text
@@ -583,7 +583,7 @@ const AddContact = ({ }) => {
                                 </Text>
                             </Pressable>
                         </View> : (yrs == true) ? 
-                        <View className='flex-row space-x-1 pb-4'>
+                        <View className='flex-row space-x-3.5 pb-4'>
                             <Pressable
                                 onPress={() => { Revertother("Semi-annually")}}>
                                 <Text

@@ -18,7 +18,7 @@ const DraftMess = ({ contact, call }) => {
         const send = async () => {
             if (message != "" && contact.number != "") { 
                 const { result } = await SMS.sendSMSAsync(
-                    contact.number.substring(0, 3) + contact.number.substring(4, 7) + contact.number.substring(8, 12),
+                    contact.number,
                     message,
                     
                 );

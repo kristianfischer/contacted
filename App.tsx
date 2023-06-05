@@ -1,6 +1,6 @@
 import React from 'react';
 import Login from "./src/Login";
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState } from 'react';
 import { User, getAuth, onAuthStateChanged } from "firebase/auth";
 import "./firebaseConfig"
 import { UserContextProvider } from './src/providers/UserProvider';
@@ -10,6 +10,7 @@ import * as Notifications from 'expo-notifications';
 import Constants from 'expo-constants';
 import storage from "@react-native-async-storage/async-storage";
 import { Platform } from 'react-native';
+
 
 type UserState = User | undefined;
 
@@ -24,6 +25,7 @@ Notifications.setNotificationHandler({
 export default function App() {
 
   useEffect(() => {
+
     const getPermission = async () => {
       if (Constants.isDevice) {
           const { status: existingStatus } = await Notifications.getPermissionsAsync();

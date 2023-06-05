@@ -8,20 +8,20 @@ import * as Contacts from 'expo-contacts';
 
 
 const ImportScreen = () => {
-
     const [importCards, setImportCards] = useState([]);
     const [search, setSearch] = useState("");
     const [filtercards, setFilterCards] = useState([]);
-    const [contact, setContact] = useState();
-
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const fetchContactCards = async () => {
             try {
                 const cards = await buildImportCards();
                 setImportCards(cards);
+                setLoading(false);
             } catch (error) {
                 console.error('Error fetching contact cards:', error);
+                setLoading(false);
             }
         };
 
@@ -66,6 +66,14 @@ const ImportScreen = () => {
                     </TextInput>
                 </TouchableOpacity>
             </View>
+            {loading ? <View className='items-center pt-10'>
+                <Feather
+                    name="loader"
+                    size={50}
+                    color={"black"}>
+                </Feather>
+                <Text className='pt-2'>Please wait one moment</Text>
+            </View> : null}
             <ScrollView
                 className='w-full h-full space-y-2'
                 showsVerticalScrollIndicator={false}>
@@ -81,7 +89,7 @@ const ImportScreen = () => {
                             </React.Fragment>
                         ))
                             } 
-                        </ScrollView>   
+            </ScrollView> 
         </View>
     );
 };

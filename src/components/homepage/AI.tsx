@@ -1,7 +1,7 @@
 import { Text, TouchableOpacity, TextInput, View } from 'react-native';
 import React, { useState } from "react";
 import { Octicons } from '@expo/vector-icons'; 
-import { doc, setDoc, getFirestore } from "firebase/firestore";
+import { doc, setDoc, getDocs, collection, getFirestore } from "firebase/firestore";
 import * as Clipboard from 'expo-clipboard';
 
 const db = getFirestore();
@@ -9,21 +9,52 @@ const db = getFirestore();
 const AI = () => {
 
     const [typedprompt, setTypedPrompt] = useState("")
+    const [prompt, setPrompt] = useState("")
     const [response, setResponse] = useState("")
 
-    const addtobase = async () => {
-        if (typedprompt != "") {
-            try {
-                const docRef = await setDoc(doc(db, "Generated Messages", typedprompt), {
-                    message: typedprompt
-                });
-                console.log("done")
-            } catch (e) {
-                console.error("Error adding document: ", e);
-            }
-        }
-    }
+    const getMessage = async () => {
+        const messageList = [];
+        const querySnapshot = await getDocs(collection(db, "GeneratedMessages"));
+        querySnapshot.forEach((doc) => {
+            messageList.push(doc.data());
+        });
+        return messageList;
+    };
 
+    const retrieveMessage = async (first) => {
+        try {
+            const info = await getMessage();
+            for (let i = 0; i < info.length; i++) {
+                if (info[i].text == first)
+                    setResponse(info[i].summary)
+            }
+            return info;
+
+        } catch (error) {
+            return []; 
+        }
+    };
+
+    let aiphrase = "Draft a text message for this subject: "
+
+    const addtobase = async () => {
+        setResponse("")
+        setPrompt(aiphrase.concat(typedprompt))
+        try {
+            const docRef = await setDoc(doc(db, "GeneratedMessages", prompt), {
+                text: prompt,
+                summary: "Error generating message. Please try again!"
+            });
+
+            
+            setTimeout(await retrieveMessage, 3500, prompt);
+
+                
+        } catch (e) {
+            console.error("Error adding document: ", e);
+        }
+
+    }
     
 
     return (
@@ -61,7 +92,7 @@ const AI = () => {
                     onPress={() => { response != "" ? Clipboard.setString(response) : null }}
                     className="h-28 m-1 border-2 w-[80%] rounded-xl text-start pl-2 pt-2 bg-gray-100">
                     <Text className='text-gray-400'>
-                        {response == ""? "Your response will load here. Touch the message to copy!" : response}
+                        {response == "" ? "Your response will load here. \nTouch the message to copy!" : response}
                     </Text>
                 </TouchableOpacity>
             </View>

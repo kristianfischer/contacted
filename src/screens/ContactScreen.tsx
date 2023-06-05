@@ -3,8 +3,7 @@ import buildContactCards from "../components/addpage/ContactCard";
 import React, { useState, useEffect } from "react";
 import AddContact from '../components/addpage/AddContact';
 import ContactView from '../components/addpage/ContactView'
-import { Octicons, Feather } from '@expo/vector-icons'; 
-import * as Contacts from 'expo-contacts';
+import { Octicons } from '@expo/vector-icons'; 
 import ImportScreen from '../components/addpage/ImportScreen';
 
 
@@ -58,7 +57,7 @@ const ContactScreen = () => {
 
     return (
         <View className=' w-full h-full'>
-            <View className={(showAddContactScreen) ? 'flex-row space-x-36 mr-3 bg-white' : 'flex-row space-x-52 pl-1.5 bg-white'}>
+            <View className={(showAddContactScreen) ? 'flex-row space-x-36 bg-white' : 'flex-row space-x-52 pl-1.5 bg-white'}>
                 {(showAddContactScreen || conview || imview) ?
                     <TouchableOpacity
                         className='mt-12 ml-6 mb-2'

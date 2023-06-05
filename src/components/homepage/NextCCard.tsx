@@ -100,7 +100,7 @@ const buildNextCCards = async(handlePress) => {
                     images.push(info[j].imagepath);
                     counter++;
                     if (counter <= 4) {
-                        reminderViews.push(<Image className=" h-full w-full border-2 mb-2" key={"reminder: " + j + ":" + i} source={{ uri: info[j].imagepath }} style={{ width: 20, height: 20, borderRadius: 10}}></Image>);
+                        reminderViews.push(<Image className=" h-full w-full border mb-2" key={"reminder: " + j + ":" + i} source={{ uri: info[j].imagepath }} style={{ width: 20, height: 20, borderRadius: 10}}></Image>);
                     }
                 }
             }
@@ -128,7 +128,7 @@ const buildNextCCards = async(handlePress) => {
                                         <View className='flex-row w-[70%]'>
                                             <View className='flex-col ml-5 items-start'>
                                                 <View className='flex-row'>
-                                                    <Text className="text-2xl text-center">{contact.first + " " + contact.last}</Text>
+                                                    <Text className="text-2xl text-center">{(contact.first.length + contact.last.length + 1 < 17) ? contact.first + " " + contact.last : contact.first + " " + contact.last.substring(0,1)}</Text>
                                                     <Text className='pt-4 pl-2 text-md'>{contact.freqspec}</Text>
                                                 </View>
                                                 <Text className='text-lg text-gray-500'>{contact.metdate.substring(4, 7) != "May" ? "Met: " + contact.metdate.substring(4, 7) + ". " + contact.metdate.substring(11, contact.metdate.length) : "Met: " + contact.metdate.substring(4, 7) + " " + contact.metdate.substring(11, contact.metdate.length)}</Text>
@@ -156,7 +156,7 @@ const buildNextCCards = async(handlePress) => {
                                         <View className='flex-row'>
                                             <View className='flex-col ml-5 items-start'>
                                                 <View className='flex-row'>
-                                                    <Text className="text-2xl w-48 text-start">{contact.first + " " + contact.last}</Text>
+                                                    <Text className="text-2xl w-48 text-start">{(contact.first.length + contact.last.length + 1 < 17) ? contact.first + " " + contact.last : contact.first + " " + contact.last.substring(0,1)}</Text>
                                                     <Text className='text-md text-gray-500 pt-3 pl-3'>{contact.metdate.substring(4, 7) != "May" ? contact.metdate.substring(4, 7) + ". " + contact.metdate.substring(11, contact.metdate.length) : contact.metdate.substring(4, 7) + " " + contact.metdate.substring(11, contact.metdate.length)}</Text>
                                                 </View>
                                                 <View className='flex-row'>
@@ -203,7 +203,7 @@ const buildNextCCards = async(handlePress) => {
                                     <View className='flex-row'>
                                         <View className='flex-col ml-5 items-start'>
                                             <View className='flex-row'>
-                                                <Text className="text-2xl w-48 text-start">{contact.first + " " + contact.last}</Text>
+                                                <Text className="text-2xl w-48 text-start">{(contact.first.length + contact.last.length + 1 < 17) ? contact.first + " " + contact.last : contact.first + " " + contact.last.substring(0,1)}</Text>
                                                 <Text className='text-md text-gray-500 pt-3 pl-3'>{contact.metdate.substring(4, 7) != "May" ? contact.metdate.substring(4, 7) + ". " + contact.metdate.substring(11, contact.metdate.length) : contact.metdate.substring(4, 7) + " " + contact.metdate.substring(11, contact.metdate.length)}</Text>
                                             </View>
                                             <View className='flex-row'>

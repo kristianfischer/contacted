@@ -96,7 +96,7 @@ const buildCalendarCards = async(handlePress) => {
                     counter++
                     images.push(info[j].imagepath);
                     if (counter <= 4) {
-                        reminderViews.push(<Image className=" h-full w-full mb-2 border-2" key={"reminder: " + j + ":" + i} source={{ uri: info[j].imagepath }} style={{ width: 20, height: 20, borderRadius: 10}}></Image>);
+                        reminderViews.push(<Image className=" h-full w-full mb-2 border" key={"reminder: " + j + ":" + i} source={{ uri: info[j].imagepath }} style={{ width: 20, height: 20, borderRadius: 10}}></Image>);
                     }
                 }
             }
@@ -114,7 +114,7 @@ const buildCalendarCards = async(handlePress) => {
                             </Text>
                         </View>
                         
-                            <ScrollView className='space-y-2 h-[78%] mb-6' key={i}>
+                            <ScrollView className='space-y-2 h-[78%] mb-5' key={i}>
                                 {dayContacts.map(contact => (
                                     <TouchableOpacity key={contact.id} className={"pb-3 mx-4 mt-3"} onPress={() => { handlePress(contact) }}>
                                         <View className='flex-row'>
@@ -124,7 +124,7 @@ const buildCalendarCards = async(handlePress) => {
                                             <View className='flex-row w-[70%]'>
                                                 <View className='flex-col ml-5 items-start'>
                                                     <View className='flex-row'>
-                                                        <Text className="text-2xl text-center">{contact.first + " " + contact.last}</Text>
+                                                        <Text className="text-2xl text-center">{(contact.first.length + contact.last.length + 1 < 17) ? contact.first + " " + contact.last : contact.first + " " + contact.last.substring(0,1)}</Text>
                                                         <Text className='pt-4 pl-2 text-md'>{contact.freqspec}</Text>
                                                     </View>
                                                     <Text className='text-lg text-gray-500'>{contact.metdate.substring(4, 7) != "May" ? "Met: " + contact.metdate.substring(4, 7) + ". " + contact.metdate.substring(11, contact.metdate.length) : "Met: " + contact.metdate.substring(4, 7) + " " + contact.metdate.substring(11, contact.metdate.length)}</Text>
@@ -152,7 +152,7 @@ const buildCalendarCards = async(handlePress) => {
                                             <View className='flex-row'>
                                                 <View className='flex-col ml-5 items-start'>
                                                     <View className='flex-row'>
-                                                        <Text className="text-2xl w-48 text-start">{contact.first + " " + contact.last}</Text>
+                                                        <Text className="text-2xl w-48 text-start">{(contact.first.length + contact.last.length + 1 < 17) ? contact.first + " " + contact.last : contact.first + " " + contact.last.substring(0,1)}</Text>
                                                         <Text className='text-md text-gray-500 pt-3 pl-3'>{contact.metdate.substring(4, 7) != "May" ? contact.metdate.substring(4, 7) + ". " + contact.metdate.substring(11, contact.metdate.length) : contact.metdate.substring(4, 7) + " " + contact.metdate.substring(11, contact.metdate.length)}</Text>
                                                     </View>
                                                     <View className='flex-row'>
@@ -199,7 +199,7 @@ const buildCalendarCards = async(handlePress) => {
                                     <View className='flex-row'>
                                         <View className='flex-col ml-5 items-start'>
                                             <View className='flex-row'>
-                                                <Text className="text-2xl w-48 text-start">{contact.first + " " + contact.last}</Text>
+                                                <Text className="text-2xl w-48 text-start">{(contact.first.length + contact.last.length + 1 < 17) ? contact.first + " " + contact.last : contact.first + " " + contact.last.substring(0,1)}</Text>
                                                 <Text className='text-md text-gray-500 pt-3 pl-3'>{contact.metdate.substring(4, 7) != "May" ? contact.metdate.substring(4, 7) + ". " + contact.metdate.substring(11, contact.metdate.length) : contact.metdate.substring(4, 7) + " " + contact.metdate.substring(11, contact.metdate.length)}</Text>
                                             </View>
                                             <View className='flex-row'>
