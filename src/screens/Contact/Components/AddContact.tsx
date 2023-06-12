@@ -2,24 +2,17 @@ import { Text, TextInput, View, ScrollView, TouchableOpacity, Pressable, Image }
 import React, { useState } from "react";
 import { Zocial } from '@expo/vector-icons'; 
 import { Octicons } from '@expo/vector-icons'; 
-import { MaterialIcons } from '@expo/vector-icons'; 
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { collection, addDoc, doc, setDoc, getFirestore } from "firebase/firestore";
+import { doc, setDoc, getFirestore } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
 import * as ImagePicker from 'expo-image-picker';
-import FrequencyCard from './FrequencyCard';
-import RelationshipCard from './RelationshipCard';
-import ContactHead from './ContactHead';
-import InformationCard from './InformationCard';
-import { useNavigation } from '@react-navigation/native';
-import ContactScreen from '../../screens/ContactScreen';
-import account from "../../../assets/acount.png";
+import account from "../../../../assets/acount.png";
 
 
 
 const db = getFirestore();
 
-const AddContact = ({ }) => {
+const AddContact = ({ onCardPress }) => {
 
     const [image, setImage] = useState(null);
 
@@ -38,7 +31,11 @@ const AddContact = ({ }) => {
     };
 
     const today = new Date();
+    const [wrong, setWrong] = useState(false)
 
+    const [birthday1, setBirthday1] = useState("");
+    const [birthday2, setBirthday2] = useState("");
+    const [birthday3, setBirthday3] = useState("");
     const [firstname, setFirst] = useState("");
     const [lastname, setLast] = useState("");
     const [number1, setNumber1] = useState("");
@@ -72,10 +69,6 @@ const AddContact = ({ }) => {
     const [ans, setAns] = useState("");
 
     const [iter, setIter] = useState(0);
-
-    function sendError() {
-        return console.log("error");
-    }
 
     const Revertother = (first) => {
 
@@ -207,13 +200,14 @@ const AddContact = ({ }) => {
                 freqgen: checktruth(wks, mns, yrs) == wks ? "Weekly" : checktruth(wks, mns, yrs) == mns ? "Monthly" : "Yearly",
                 freqspec: ans,
                 metdate: String(newdate).substring(0, 15),
-                startdate: String(today),
+                startdate: String(new Date(today.getTime() + iter * 24 * 60 *60 * 1000)),
                 iterative: String(iter),
                 imagepath: image,
                 lastdate: " ",
                 lastmess: " ",
-                updated: "y"
-
+                updated: "y",
+                nextcon: String(new Date(today.getTime() + iter * 24 * 60 * 60 * 1000)),
+                birthday: birthday1.concat("/", birthday2, "/", birthday3)
             });  
             } catch (e) {
             console.error("Error adding document: ", e);
@@ -248,6 +242,8 @@ const AddContact = ({ }) => {
         setBiy(false);
         setIter(0)
         setImage(null);
+
+        onCardPress(false)
     }
 
 
@@ -263,27 +259,30 @@ const AddContact = ({ }) => {
                 >
                     
 
-                    <View className='flex-row space-x-32'>    
-                        <Text className='text-3xl text-start ml-3'>
+                    <View className='flex-row space-x-40'>    
+                        <Text className='text-3xl text-start ml-1'>
                             New Contact
                         </Text>
                         <TouchableOpacity
-                            className='mt-1'
-                            onPress={() => { (firstname != "" && lastname != "" && (prof == true || friend == true || fam == true) && ans != "") ?  addtobase()  : sendError() }}>
+                            className=''
+                            onPress={() => { (firstname != "" && lastname != "" && (prof == true || friend == true || fam == true) && ans != "") ?  addtobase()  : setWrong(true) }}>
                             <Octicons
                                 name='plus'
-                                size={30}
+                                size={35}
                                 color = "black">
                             </Octicons>
                         </TouchableOpacity>
                     </View>
 
+                    {wrong ? 
+                    <Text className='pt-2 px-4 text-center'>Please provide a full name, number, relationship, and frequency</Text> : null}
 
-                    <View className={'flex-row w-full bg-gray-100 rounded-lg border-2 mt-3'}>
+
+                    <View className={(firstname == "" || lastname == "") ? 'flex-row w-full bg-gray-100 rounded-lg mt-3' : 'flex-row w-full bg-custom rounded-lg mt-3'}>
                         <View className={'flex-col pl-4 w-[75%]'}>
                             <TextInput
                                 autoCorrect={false}
-                                className= 'h-12 text-start text-xl'
+                                className={(firstname == "" || lastname == "") ? 'h-12 text-start text-xl' : 'h-12 text-start text-xl text-white'}
                                 onChangeText={setFirst}
                                 value={firstname}
                                 placeholder="First Name"
@@ -291,25 +290,60 @@ const AddContact = ({ }) => {
                             </TextInput>
                             <TextInput
                                 autoCorrect={false}
-                                className='h-12 text-start text-xl pb-3'
+                                className={(firstname == "" || lastname == "") ? 'h-12 text-start text-xl pb-3' : 'h-12 text-start text-xl text-white pb-3'}
                                 onChangeText={setLast}
                                 value={lastname}
                                 placeholder={"Last Name"}
                             >
                             </TextInput>
+                            <View className='flex-row'>
+                                <Text className={ (firstname != "" && lastname != "") ? "text-white" : (birthday1 == "" && birthday2 == "" && birthday3 == "") ? 'text-mygray' : ""}>DOB:</Text>
+                                <TextInput
+                                    maxLength={2}
+                                    placeholderTextColor={(firstname != "" && lastname != "") ? "white" : '#C7C7CD'}
+                                    autoCorrect={false}
+                                    className={(firstname == "" || lastname == "") ? 'h-7 text-start text-md pb-2.5 pl-1' : 'h-7 text-start text-md text-white pb-2.5 pl-1'}
+                                    onChangeText={setBirthday1}
+                                    value={birthday1}
+                                    placeholder={"dd"}
+                                    keyboardType='numeric'>
+                                </TextInput>
+                                <Text className={(firstname != "" && lastname != "") ? "text-white" : (birthday1 == "" && birthday2 == "") ? 'text-mygray' : ""}>/</Text>
+                                <TextInput
+                                    maxLength={2}
+                                    placeholderTextColor={(firstname != "" && lastname != "") ? "white" : '#C7C7CD'}
+                                    autoCorrect={false}
+                                    className={(firstname == "" || lastname == "") ? 'h-7 text-start text-md pb-2.5' : 'h-7 text-start text-md text-white pb-2.5'}
+                                    onChangeText={setBirthday2}
+                                    value={birthday2}
+                                    placeholder={"mm"}
+                                    keyboardType='numeric'>
+                                </TextInput>
+                                <Text className={(firstname != "" && lastname != "") ? "text-white" : (birthday2 == "" && birthday3 == "") ? 'text-mygray' : ""}>/</Text>
+                                <TextInput
+                                    maxLength={4}
+                                    placeholderTextColor={(firstname != "" && lastname != "") ? "white" : '#C7C7CD'}
+                                    autoCorrect={false}
+                                    className={(firstname == "" || lastname == "") ? 'h-7 text-start text-md pb-2.5' : 'h-7 text-start text-md text-white pb-2.5'}
+                                    onChangeText={setBirthday3}
+                                    value={birthday3}
+                                    placeholder={"yyyy"}
+                                    keyboardType='numeric'>
+                                </TextInput>
+                            </View>
                         </View>
                         <TouchableOpacity
                             className={image == null ?'pt-2':'pt-3 pl-1'}
                             onPress={pickImage}>
                             {image == null ?
-                                <Image className="h-full w-full border-2 mt-1 ml-1" source={{ uri: Image.resolveAssetSource(account).uri }} style={{ width: 70, height: 70, borderRadius: 35 }}></Image>
+                                <Image className="h-full w-full mt-1 ml-1" source={{ uri: Image.resolveAssetSource(account).uri }} style={{ width: 70, height: 70, borderRadius: 35 }}></Image>
                                                             :
-                                <Image className = "border-2" source={{ uri: image }} style={{ width: 70, height: 70, borderRadius: 35}} />}
+                                <Image className = "" source={{ uri: image }} style={{ width: 70, height: 70, borderRadius: 35}} />}
                         </TouchableOpacity>
                     </View>
 
                     
-                    <View className={(firstname == "" || lastname == "") ? 'border-b-4 border-gray-300 pt-10 mx-36' : 'border-b-4 pt-10 mx-36'}></View>
+                    
 
                     <View>
                         <Text className='text-2xl pt-5 pl-1 mb-4'>
@@ -317,7 +351,7 @@ const AddContact = ({ }) => {
                         </Text>
                     </View>
 
-                    <View className={'flex-col w-full space-y-5 bg-gray-100 rounded-lg border-2'}>
+                    <View className={'flex-col w-full space-y-5 bg-gray-100 rounded-lg'}>
                         <View className='flex-row pt-3 space-x-12 pl-5'>
                             <Octicons
                                 name="comment-discussion"
@@ -413,8 +447,6 @@ const AddContact = ({ }) => {
                     </View>
 
 
-                    <View className={(number1 == "" || number2 == "" || number3 == "") ? 'border-b-4 border-gray-300 pt-10 mx-36' : 'border-b-4 pt-10 mx-36'}></View>
-
 
                     <View>
                         <Text className='text-2xl pt-5 pl-1'>
@@ -423,7 +455,7 @@ const AddContact = ({ }) => {
                     </View>
 
 
-                    <View className={'flex-col w-full space-y-6 px-8 mt-4 pt-4 pb-3 mb-8 border-2 rounded-lg bg-gray-100'}>
+                    <View className={'flex-col w-full space-y-6 px-8 mt-4 pt-4 pb-3 mb-8 rounded-lg bg-gray-100'}>
 
                         <View className='flex-row space-x-9'>
                             <Pressable
@@ -496,7 +528,6 @@ const AddContact = ({ }) => {
                     </View>
 
                     
-                    <View className={(duration == "") ? 'border-b-4 border-gray-300 pt-2 mx-36': 'border-b-4 pt-2 mx-36'}></View>
 
 
                     <View>
@@ -506,7 +537,7 @@ const AddContact = ({ }) => {
                     </View>
 
                     
-                    <View className={'flex-col w-full space-y-6 px-4 mt-4 pt-2 border-2 rounded-lg bg-gray-100'}>
+                    <View className={'flex-col w-full space-y-6 px-4 mt-4 pt-2 rounded-lg bg-gray-100'}>
                         <Text
                             className='w-full h-7 pb-2 text-center text-lg text-black italic'>
                             How often do you want to reach out?

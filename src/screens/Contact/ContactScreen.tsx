@@ -1,11 +1,15 @@
-import { Text, View, ScrollView, TouchableOpacity, TextInput } from 'react-native'; 
-import buildContactCards from "../components/addpage/ContactCard";
+import { Text, View, TouchableOpacity, TextInput } from 'react-native'; 
+import ContactList from "./Components/ContactList";
 import React, { useState, useEffect } from "react";
-import AddContact from '../components/addpage/AddContact';
-import ContactView from '../components/addpage/ContactView'
+import AddContact from './Components/AddContact';
+import ContactView from './Components/ContactView'
 import { Octicons } from '@expo/vector-icons'; 
-import ImportScreen from '../components/addpage/ImportScreen';
+import ImportScreen from './Components/ImportScreen';
+import { query, collection, getFirestore, onSnapshot } from "firebase/firestore"; 
+import { getAuth } from "firebase/auth";
 
+
+const db = getFirestore();
 
 const ContactScreen = () => {
 
@@ -17,29 +21,41 @@ const ContactScreen = () => {
     const [imview, setImView] = useState(false);
     const [contact, setContact] = useState();
     const [search, setSearch] = useState("");
-    const [filterbcards, setFilterBCards] = useState([]);
+
+    function sortContactsByUpdated(contacts) {
+        const updatedContacts = contacts.filter(contact => contact.updated === "n");
+        const otherContacts = contacts.filter(contact => contact.updated !== "n");
+        const sortedContacts = updatedContacts.concat(otherContacts);
+        return sortedContacts;
+    }
 
     useEffect(() => {
-        const fetchContactCards = async () => {
-            try {
-                const cards = await buildContactCards(handleCardPress);
-                setContactCards(cards[0]);
-                setFilterBCards(cards[1]);
-            } catch (error) {
-                console.error('Error fetching contact cards:', error);
-            }
-        };
+        const q = query(collection(db, "Users", getAuth().currentUser.uid, "Contacts"));
+        const unsubscribe = onSnapshot(q, (querySnapshot) => {
+        const contacts = [];
+        querySnapshot.forEach((doc) => {
+            contacts.push(doc.data());
+        });
+            setContactCards(sortContactsByUpdated(contacts))
+        });
 
-        fetchContactCards();
+        return () => {
+            unsubscribe()
+        }
+
     }, []);
 
+
+    const turnoffConview = () => {
+        setConView(false)
+    }
 
     const handleCardPress = (contact) => {
         setConView(true);
         setContact(contact);
     }
 
-    function twoCalls(name){
+    function twoCalls(name) {
         setSearch(name);
         setFilterCards(filterSearch(name));
         setFilterB(false);
@@ -48,48 +64,73 @@ const ContactScreen = () => {
     const filterSearch = (search) => {
         var lfiltercards = new Array();
         for (let i = 0; i < contactCards.length; i++) {
-            if ((search.toLowerCase() == contactCards[i].key.substring(0, search.length).toLowerCase()) && !lfiltercards.includes(contactCards[i])) {
+            if ((search.toLowerCase() == (contactCards[i].first + " " + contactCards[i].last).substring(0, search.length).toLowerCase()) && !lfiltercards.includes(contactCards[i])) {
                 lfiltercards.push(contactCards[i]);
             }
         }
         return lfiltercards
     }
 
+    const filterCards = (contacts) => {
+        const profarr = [];
+        const friendarr = [];
+        const famarr = [];
+        const filteredContactCards = []
+
+        for (let i = 0; i < contacts.length; i++) {
+            if (contacts[i].relation == "Professional")
+                profarr.push(contacts[i]);
+            else if (contacts[i].relation == "Friend")
+                friendarr.push(contacts[i]);
+            else if (contacts[i].relation == "Family")
+                famarr.push(contacts[i]);
+        }
+    
+        for (let k = 0; k < famarr.length; k++)
+            filteredContactCards.push(famarr[k]);
+        for (let k = 0; k < profarr.length; k++)
+            filteredContactCards.push(profarr[k]);
+        for (let k = 0; k < friendarr.length; k++)
+            filteredContactCards.push(friendarr[k]);
+        
+        return filteredContactCards;
+    }
+
+    
     return (
-        <View className=' w-full h-full'>
+        <View className='bg-custom w-full h-full'>
             <View className={(showAddContactScreen) ? 'flex-row space-x-36 bg-white' : 'flex-row space-x-52 pl-1.5 bg-white'}>
                 {(showAddContactScreen || conview || imview) ?
                     <TouchableOpacity
-                        className='mt-12 ml-6 mb-2'
+                        className={!imview ? 'mt-12 ml-4 mb-2' : 'mt-12 ml-3 mb-2'}
                         onPress={() => {
                             showAddContactScreen == true ?
-                                setShowAddContactScreen(!showAddContactScreen)
+                                setShowAddContactScreen(false)
                                 : conview == true ?
-                                    setConView(!conview) : imview == true ? setImView(!imview) :
-                                        null
+                                    setConView(false) : imview == true ? setImView(false):null
                         }}>
                         <Octicons
                             name="reply"
-                            size={25}
+                            size={30}
                             color="black"
                         ></Octicons>
                     </TouchableOpacity>
                     :
                     <View className='flex-row pl-3'>
-                        <Text className='mt-20 text-3xl'>
+                        <Text className='mt-20 mb-1 text-3xl'>
                             Contacts
                         </Text>
                         <TouchableOpacity
-                            className='mt-16 pt-6 ml-4'
+                            className='mt-14 pt-0.5 pl-40 ml-1.5'
                             onPress={() => { setImView(true) }}>
                             <Octicons
                                 name="upload"
-                                size={23}
+                                size={26}
                                 color="black"
                             ></Octicons>
                         </TouchableOpacity>
                         <TouchableOpacity
-                            className='mt-12 mb-10 ml-40 pl-3.5'
+                            className='mt-14 ml-2 pl-3.5'
                             onPress={() => { setShowAddContactScreen(!showAddContactScreen) }}>
                             <Octicons
                                 name="plus"
@@ -100,8 +141,8 @@ const ContactScreen = () => {
                     </View>}
             </View>
             {showAddContactScreen ? (
-                <AddContact />
-            ) : conview == true ? < ContactView contact={contact} /> : imview == true ? < ImportScreen /> : (
+                <AddContact onCardPress={setShowAddContactScreen}/>
+            ) : conview == true ? < ContactView contact={contact} onCardPress={setConView} /> : imview == true ? < ImportScreen onCardPress={setImView} /> : (
             <>
             <View className = 'flex-row space-x-4 pl-3 bg-white'>
                 <TouchableOpacity
@@ -125,28 +166,8 @@ const ContactScreen = () => {
                     ></Octicons>
                 </TouchableOpacity>
             </View>
-            <ScrollView
-                className='w-full h-full space-y-2'
-                showsVerticalScrollIndicator={false}>
-                    {filterb ?
-                        filterbcards.map((card, index) => (
-                            <React.Fragment key={index}>
-                                <View className ={index == 0 ? 'border-t' : null}>{card}</View>
-                            </React.Fragment>))
-                                : search != "" ?
-                        filtercards.map((card, index) => (
-                            <React.Fragment key={index}>
-                                <View className ={index == 0 ? 'border-t' : null}>{card}</View>
-                            </React.Fragment>))
-                                : 
-                        contactCards.map((card, index) => (
-                            <React.Fragment key={index}>
-                                <View className ={index == 0 ? 'border-t' : null}>{card}</View>
-                            </React.Fragment>
-                        ))
-                            } 
-                        </ScrollView>   
-                        {contactCards.length == 0 ? <Text className='text-center text-gray-400 mb-3'>Dont see anything? Add connections to get started!</Text> : null}        
+            <ContactList contacts={filterb ? filterCards(contactCards) : search != "" ? filtercards : contactCards} onCardPress={handleCardPress} />
+            {contactCards.length == 0 ? <Text className='text-center text-white mb-3'>Dont see anything? Add contacts to get started!</Text> : null}        
                 </>
             )}
         </View>

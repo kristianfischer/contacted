@@ -1,44 +1,40 @@
-import { Text, TouchableOpacity, TextInput, View, Pressable } from 'react-native';
-import React, { useState } from "react";
+import { Text, TouchableOpacity, TextInput, View, Pressable, ActivityIndicator } from 'react-native';
+import React, { useEffect, useState } from "react";
 import { Octicons } from '@expo/vector-icons'; 
-import { DocumentSnapshot, doc, setDoc } from "firebase/firestore";
+import { query, onSnapshot, doc, setDoc } from "firebase/firestore";
 import * as Clipboard from 'expo-clipboard';
 import { useKeyboard } from "@react-native-community/hooks"
-import { getDocs, collection, getFirestore } from "firebase/firestore"; 
+import { getDocs, getDoc, collection, getFirestore } from "firebase/firestore"; 
 import { getAuth } from "firebase/auth";
 
 const Recommendations = ({ }) => {
 
     const db = getFirestore();
+    const [prompt, setPrompt] = useState("");
+    const [response, setResponse] = useState("Your response will load here. Touch the message to copy!")
+    const [promptChanged, setPromptChanged] = useState(false);
+
+    useEffect(() => {
+        if (promptChanged) {
+            const docRef = doc(db, "GeneratedMessages", aiphrase.concat(prompt));
+            const unsubscribe = onSnapshot(docRef, (docSnapshot) => {
+                if (docSnapshot.exists()) {
+                    const data = docSnapshot.data();
+                    setResponse(data.summary)
+                } else {
+                    console.log("Error finding document")
+                }
+            });
+            return () => {
+                unsubscribe();
+            };
+        }
+    }, [prompt]);
 
     
     const [typedprompt, setTypedPrompt] = useState("");
-    const [response, setResponse] = useState("")
-    const [prompt, setPrompt] = useState("");
 
-    const getMessage = async () => {
-        const messageList = [];
-        const querySnapshot = await getDocs(collection(db, "GeneratedMessages"));
-        querySnapshot.forEach((doc) => {
-            messageList.push(doc.data());
-        });
-        return messageList;
-    };
-
-    const retrieveMessage = async (first) => {
-        try {
-            const info = await getMessage();
-            for (let i = 0; i < info.length; i++) {
-                if (info[i].text == first)
-                    setResponse(info[i].summary)
-            }
-            return info;
-
-        } catch (error) {
-            return []; 
-        }
-    };
-
+    
     const keyboard = useKeyboard();
     let aiphrase = "Draft a text message for this subject: "
 
@@ -47,13 +43,8 @@ const Recommendations = ({ }) => {
         try {
             const docRef = await setDoc(doc(db, "GeneratedMessages", first), {
                 text: first,
-                summary: "Error generating message. Please try again!"
+                summary: "Your response will load here. Touch the message to copy!" 
             });
-
-            
-            setTimeout(await retrieveMessage, 3500, first);
-
-
                 
         } catch (e) {
             console.error("Error adding document: ", e);
@@ -63,27 +54,26 @@ const Recommendations = ({ }) => {
 
 
     const promptAI = (first) => {
-        let newwordbool;
-        let newword = "";
-        setPrompt(first);
+        setPromptChanged(true);
         setTypedPrompt("");
         addtobase(aiphrase.concat(first));
+        setPrompt(first);
     }
 
 
     return (
-        <View className="h-full flex flex-1 justify-start w-full bg-white pt-20">
+        <View className="h-full flex flex-1 justify-start w-full bg-custom pt-20">
             <View className='items-start pl-5'>
-                <Text className='text-3xl'>
+                <Text className='text-3xl text-white'>
                     Need Help Reaching Out?
                 </Text>
-                <Text className='text-md pl-3 pt-2 pb-4'>
+                <Text className='text-md pl-3 pt-2 pb-4 text-white font-semibold pr-5'>
                     Press a subject and get a reccomended message to reach out with!
                 </Text>
             </View>
             <View className='items-center'>
-                <View className='w-[85%] h-20 border-2 bg-gray-100 border-dashed border-gray-600 rounded-sm mb-4 items-center space-y-3'>
-                    <View className='flex-row space-x-4'>
+                <View className='w-[85%] h-20  rounded-md bg-white mb-3.5 items-center space-y-3'>
+                    <View className='flex-row space-x-4 pt-1'>
                         <Pressable
                             disabled = {keyboard.keyboardShown ? true : false}
                             onPress={() => { promptAI("Professional First Contact") }}>
@@ -108,8 +98,8 @@ const Recommendations = ({ }) => {
                         </Pressable>
                     </View>
                 </View>
-                <View className='w-[85%] h-20 border-2 bg-gray-100 border-dashed border-gray-600 rounded-sm mb-4 items-center space-y-3'>
-                    <View className='flex-row space-x-4'>
+                <View className='w-[85%] h-20 bg-white rounded-md mb-3.5 items-center space-y-3'>
+                    <View className='flex-row space-x-4 pt-1'>
                         <Pressable onPress={() => { promptAI("Friendly Catch Up") }} disabled = {keyboard.keyboardShown ? true : false}>
                             <Text className={prompt != "Friendly Catch Up" ? 'text-gray-400 pt-2' : 'text-black pt-2'}>Catch Up</Text>
                         </Pressable>
@@ -132,8 +122,8 @@ const Recommendations = ({ }) => {
                         </Pressable>
                     </View>
                 </View>
-                <View className='w-[85%] h-20 border-2 border-dashed border-gray-600 bg-gray-100 rounded-sm mb-4 items-center space-y-3'>
-                    <View className='flex-row space-x-4'>
+                <View className='w-[85%] h-20 bg-white rounded-md mb-1 items-center space-y-3'>
+                    <View className='flex-row space-x-4 pt-1'>
                         <Pressable onPress={() => { promptAI("Family Personal Update") }} disabled = {keyboard.keyboardShown ? true : false}>
                             <Text className={prompt != "Family Personal Update" ? 'text-gray-400 pt-2' : 'text-black pt-2'}>Personal Update</Text>
                         </Pressable>
@@ -156,44 +146,39 @@ const Recommendations = ({ }) => {
                         </Pressable>
                     </View>
                 </View>
-                <Text className='text-md pl-3'>
-                    Or, come up with your own! Type a subject below to recieve a personal message for your contact.
-                </Text>
             </View>
-            <View className='flex-row pl-20'>
-            <View className='flex-row'>
-                    <View className='pt-4'>
-                        <Octicons
-                            name="dependabot"
-                            size={35}
-                            color = "black">
-                        </Octicons>
-                    </View>
-                    <View className='pl-1 w-[70%]'>
+            <View className='flex-row pl-4 ml-0.5'>
+            <View className='flex-row pb-1'>
+                    <View className=' w-[83%]'>
                         <TextInput
                             placeholder="i.e Hey mom!"
                             onChangeText={setTypedPrompt}
                             value={typedprompt}
-                            className="h-10 text-start m-3 border-2 p-2 rounded-md">
+                            className="h-10 text-start m-3 p-2 rounded-md bg-white">
                         </TextInput>
                     </View>
-                    <TouchableOpacity className='pt-5'
+                    <TouchableOpacity className='pt-3 pl-2 ml-0.5'
                         onPress={() => { promptAI(typedprompt) }}>
                         <Octicons
-                            name="check-circle"
-                            size={25}
-                            color = "black">
+                            name="arrow-right"
+                            size={40}
+                            color = "white">
                         </Octicons>
                     </TouchableOpacity>
                 </View>
             </View>
+            <Text className='text-md pl-8 text-white font-semibold pb-4 pr-2'>
+                    Or, come up with your own! Type a subject to recieve a personal message for your contact.
+                </Text>
             <View className='items-center'>
                 <TouchableOpacity
                     onPress={() => { response != "" ? Clipboard.setString(response) : null }}
-                    className="h-44 m-1 border-2 w-[80%] rounded-xl text-start pl-2 pt-2 bg-gray-100">
-                    <Text>
-                        {response == ""? "Your response will load here. \nTouch the message to copy!" : response}
-                    </Text>
+                    className="h-44  w-[85%] rounded-xl text-start p-2 bg-white">
+                        {((response == "" || response == "Your response will load here. Touch the message to copy!") && promptChanged)?
+                        <View className=''>
+                            <Text className='text-gray-400'>Your response will load here. Touch the message to copy!</Text>   
+                            <ActivityIndicator color="#000" size="small" className='pt-9'/>
+                        </View> : <Text className={response == "Your response will load here. Touch the message to copy!" ? 'text-gray-400' : 'font-semibold'}>{response}</Text>}
                 </TouchableOpacity>
             </View>
         </View>

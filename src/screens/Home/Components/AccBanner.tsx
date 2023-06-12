@@ -14,7 +14,7 @@ const AccBanner = ({ }) => {
     const keyboard = useKeyboard();
 
     return (
-        <View className={'bg-white w-full pt-7 border-b-2'}>
+        <View className={'bg-custom w-full pt-7'}>
             <View className='flex-row w-full'>
                 <View className={'items-end w-[90%] ml-5 mt-4'}>
                     <TouchableOpacity
@@ -22,13 +22,13 @@ const AccBanner = ({ }) => {
                         <Octicons
                             name="sign-out"
                             size={25}
-                            color="black">
+                            color="white">
                         </Octicons>
                     </TouchableOpacity>
                 </View>
                         
                 </View>
-                <Text className='text-3xl text-center font-semibold'>
+                <Text className='text-3xl pb-1 text-center text-white font-semibold'>
                     Contacted
                 </Text>
                 

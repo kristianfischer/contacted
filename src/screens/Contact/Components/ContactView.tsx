@@ -7,13 +7,14 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { deleteDoc, doc, setDoc, getFirestore } from "firebase/firestore";
 import * as ImagePicker from 'expo-image-picker';
 import { getAuth } from "firebase/auth";
+import account from "../../../../assets/acount.png";
 
 const db = getFirestore();
 const today = new Date();
 
-const AddContact = (props) => {
+const AddContact = ({contact, onCardPress }) => {
 
-    const [image, setImage] = useState(props.contact.imagepath);
+    const [image, setImage] = useState(contact.imagepath);
 
     const pickImage = async () => {
         // No permissions request is necessary for launching the image library
@@ -29,29 +30,36 @@ const AddContact = (props) => {
         }
     };
 
+    const [birthday1, setBirthday1] = useState(contact.birthday.substring(0,2));
+    const [birthday2, setBirthday2] = useState(contact.birthday.substring(3,5));
+    const [birthday3, setBirthday3] = useState(contact.birthday.substring(6,10));
     const [edit, setEdit] = useState(false);
-    const [firstname, setFirst] = useState(props.contact.first);
-    const [lastname, setLast] = useState(props.contact.last);
-    const [number1, setNumber1] = useState(props.contact.number.substring(0,3));
-    const [number2, setNumber2] = useState(props.contact.number.substring(3,6));
-    const [number3, setNumber3] = useState(props.contact.number.substring(6,10));
-    const [email, setEmail] = useState(props.contact.email);
-    const [insta, setInsta] = useState(props.contact.insta);
-    const [snap, setSnap] = useState(props.contact.snap);
-    const [duration, setDuration] = useState(props.contact.lor);
-    const [relation, setRelation] = useState(props.contact.relation);
-    const [unit, setUnit] = useState(props.contact.unit);
-    const [choosegen, setGen] = useState(props.contact.freqgen);
-    const [choosespec, setSpec] = useState(props.contact.freqspec);
+    const [firstname, setFirst] = useState(contact.first);
+    const [lastname, setLast] = useState(contact.last);
+    const [number1, setNumber1] = useState(contact.number.substring(0,3));
+    const [number2, setNumber2] = useState(contact.number.substring(3,6));
+    const [number3, setNumber3] = useState(contact.number.substring(6,10));
+    const [email, setEmail] = useState(contact.email);
+    const [insta, setInsta] = useState(contact.insta);
+    const [snap, setSnap] = useState(contact.snap);
+    const [duration, setDuration] = useState(contact.lor);
+    const [relation, setRelation] = useState(contact.relation);
+    const [unit, setUnit] = useState(contact.unit);
+    const [choosegen, setGen] = useState(contact.freqgen);
+    const [choosespec, setSpec] = useState(contact.freqspec);
 
-    const [iter, setIter] = useState(props.contact.iterative);
+    const [iter, setIter] = useState(contact.iterative);
+
+    const [wrong, setWrong] = useState(false)
 
 
     const deleteCon = async () => {
-        await deleteDoc(doc(db, "Users", getAuth().currentUser.uid, "Contacts", props.contact.last + ", " + props.contact.first));
+        await deleteDoc(doc(db, "Users", getAuth().currentUser.uid, "Contacts", contact.last.concat(", ", contact.first)));
+        onCardPress(false);
     }
 
     const addtobase = async () => {
+        setWrong(false)
         deleteCon();
         var newdate;
         if (unit == "Days") {
@@ -63,7 +71,7 @@ const AddContact = (props) => {
         }
 
         try {
-            const docRef = await setDoc(doc(db, "Users", getAuth().currentUser.uid, "Contacts", firstname + ", " + lastname), {
+            const docRef = await setDoc(doc(db, "Users", getAuth().currentUser.uid, "Contacts", lastname + ", " + firstname), {
                 first: firstname,
                 last: lastname,
                 number: number1.concat(number2, number3),
@@ -75,19 +83,21 @@ const AddContact = (props) => {
                 lor: duration,
                 freqgen: choosegen,
                 freqspec: choosespec,
-                metdate: String(newdate).substring(0, 15),
-                startdate: props.contact.startdate,
+                metdate: contact.updated == 'y' ? contact.metdate : String(newdate).substring(0, 15),
+                startdate: contact.startdate == "" ? String(new Date(today.getTime() + iter * 24 * 60 *60 * 1000)) : contact.startdate,
                 iterative: String(iter),
                 imagepath: image,
-                lastdate: props.contact.lastdate,
-                lastmess: props.contact.lastmess,
-                updated: "y"
+                lastdate: contact.lastdate,
+                lastmess: contact.lastmess,
+                updated: "y",
+                nextcon: String(new Date(today.getTime() + iter * 24 * 60 * 60 * 1000)),
+                birthday: birthday1.concat("/", birthday2, "/", birthday3)
 
-            });  
+            }); 
             } catch (e) {
             console.error("Error adding document: ", e);
         }
-
+        setEdit(!edit) 
     }
 
     return (
@@ -104,14 +114,14 @@ const AddContact = (props) => {
                     
 
                     <View className='flex-row'>    
-                        <Text className='text-3xl text-start ml-5 w-[57%]'>
+                        <Text className='text-3xl text-start ml-1 w-[57%]'>
                             { edit ? "Edit Contact" : "View Contact"}
                         </Text>
                         <TouchableOpacity
-                            className='mt-1 pl-14'
+                            className='mt-1 pl-16'
                             onPress={() => {
-                                (firstname != "" && lastname != "" && (relation == "Professional" || relation == "Friend" || relation == "Family") && choosespec != "" && edit == true) ? addtobase() : null
-                                setEdit(!edit) }}>
+                                (firstname != "" && lastname != "" && (relation == "Professional" || relation == "Friend" || relation == "Family") && choosespec != "" && edit == true) ? addtobase() : edit ? setWrong(true) : setEdit(!edit)
+                                }}>
                             {edit == false? <Feather
                                 name="edit"
                                 size={30}
@@ -134,13 +144,17 @@ const AddContact = (props) => {
                         </TouchableOpacity>
                     </View>
 
+                    {wrong ? 
+                    <Text className='pt-2 px-4 text-center'>Please provide a full name, number, relationship, and frequency</Text> : null}
 
-                    <View className={'flex-row w-full bg-gray-100 rounded-lg border-2 mt-3'}>
+
+
+                    <View className = {(firstname == "" || lastname == "") ? 'flex-row w-full bg-gray-100 rounded-lg mt-3' : 'flex-row w-full bg-custom rounded-lg mt-3'}>
                         <View className={'flex-col w-[75%] pl-4'}>
                             <TextInput
                                 editable={edit}
                                 selectTextOnFocus={edit}
-                                className= 'h-12 text-start text-xl'
+                                className={(firstname == "" || lastname == "") ? 'h-12 text-start text-xl' : 'h-12 text-start text-xl text-white'}
                                 onChangeText={setFirst}
                                 value={firstname}
                                 placeholder="First Name"
@@ -149,29 +163,61 @@ const AddContact = (props) => {
                             <TextInput
                                 editable={edit}
                                 selectTextOnFocus={edit}
-                                className='h-12 text-start text-xl pb-3'
+                                className={(firstname == "" || lastname == "") ? 'h-12 text-start text-xl pb-3' : 'h-12 text-start text-xl text-white pb-3'}
                                 onChangeText={setLast}
                                 value={lastname}
                                 placeholder={"Last Name"}
                             >
                             </TextInput>
+                            <View className='flex-row'>
+                                <Text className={ (firstname != "" && lastname != "") ? "text-white" : (birthday1 == "" && birthday2 == "" && birthday3 == "") ? 'text-mygray' : ""}>DOB:</Text>
+                                <TextInput
+                                    maxLength={2}
+                                    placeholderTextColor={(firstname != "" && lastname != "") ? "white" : '#C7C7CD'}
+                                    autoCorrect={false}
+                                    className={(firstname == "" || lastname == "") ? 'h-7 text-start text-md pb-2.5 pl-1' : 'h-7 text-start text-md text-white pb-2.5 pl-1'}
+                                    onChangeText={setBirthday1}
+                                    value={birthday1}
+                                    placeholder={"dd"}
+                                    keyboardType='numeric'>
+                                </TextInput>
+                                <Text className={(firstname != "" && lastname != "") ? "text-white" : (birthday1 == "" && birthday2 == "") ? 'text-mygray' : ""}>/</Text>
+                                <TextInput
+                                    maxLength={2}
+                                    placeholderTextColor={(firstname != "" && lastname != "") ? "white" : '#C7C7CD'}
+                                    autoCorrect={false}
+                                    className={(firstname == "" || lastname == "") ? 'h-7 text-start text-md pb-2.5' : 'h-7 text-start text-md text-white pb-2.5'}
+                                    onChangeText={setBirthday2}
+                                    value={birthday2}
+                                    placeholder={"mm"}
+                                    keyboardType='numeric'>
+                                </TextInput>
+                                <Text className={(firstname != "" && lastname != "") ? "text-white" : (birthday2 == "" && birthday3 == "") ? 'text-mygray' : ""}>/</Text>
+                                <TextInput
+                                    maxLength={4}
+                                    placeholderTextColor={(firstname != "" && lastname != "") ? "white" : '#C7C7CD'}
+                                    autoCorrect={false}
+                                    className={(firstname == "" || lastname == "") ? 'h-7 text-start text-md pb-2.5' : 'h-7 text-start text-md text-white pb-2.5'}
+                                    onChangeText={setBirthday3}
+                                    value={birthday3}
+                                    placeholder={"yyyy"}
+                                    keyboardType='numeric'>
+                                </TextInput>
+                            </View>
                         </View>
                         <TouchableOpacity
                             disabled={!edit}
                             className={image == null ?'pt-2':'pt-3 pl-1'}
                             onPress={pickImage}>
                             {image == null ?
-                                <MaterialIcons
-                                    name="account-circle"
-                                    size={80}
-                                    color="black">
-                                </MaterialIcons> :
-                                <Image className='border-2' source={{ uri: image }} style={{ width: 70, height: 70, borderRadius: 35}} />}
+                                <Image className="h-full w-full mt-1 ml-1" source={{ uri: Image.resolveAssetSource(account).uri }} style={{ width: 70, height: 70, borderRadius: 35 }}></Image>
+                                                            :
+                                <Image className = "" source={{ uri: image }} style={{ width: 70, height: 70, borderRadius: 35}} />}
                         </TouchableOpacity>
                     </View>
 
                     
-                    <View className={(firstname == "" || lastname == "") ? 'border-b-4 border-gray-300 pt-10 mx-36' : 'border-b-4 pt-10 mx-36'}></View>
+                    {/* <View className={(firstname == "" || lastname == "") ? 'border-b-4 border-gray-300 pt-10 mx-36' : 'border-b-4 pt-10 mx-36'}></View> */}
 
                     <View>
                         <Text className='text-2xl pt-5 pl-1 mb-4'>
@@ -179,7 +225,7 @@ const AddContact = (props) => {
                         </Text>
                     </View>
 
-                    <View className={'flex-col w-full space-y-5 bg-gray-100 rounded-lg border-2'}>
+                    <View className={'flex-col w-full space-y-5 bg-gray-100 rounded-lg'}>
                         <View className='flex-row pt-3 space-x-12 pl-5'>
                             <Octicons
                                 name="comment-discussion"
@@ -278,7 +324,7 @@ const AddContact = (props) => {
                     </View>
 
 
-                    <View className={(number1 == "" || number2 == "" || number3 == "") ? 'border-b-4 border-gray-300 pt-10 mx-36' : 'border-b-4 pt-10 mx-36'}></View>
+                    {/* <View className={(number1 == "" || number2 == "" || number3 == "") ? 'border-b-4 border-gray-300 pt-10 mx-36' : 'border-b-4 pt-10 mx-36'}></View> */}
 
 
                     <View>
@@ -288,7 +334,7 @@ const AddContact = (props) => {
                     </View>
 
 
-                    <View className={'flex-col w-full space-y-6 px-8 mt-4 pt-4 pb-3 mb-8 border-2 rounded-lg bg-gray-100'}>
+                    <View className={'flex-col w-full space-y-6 px-8 mt-4 pt-4 pb-3 mb-8 rounded-lg bg-gray-100'}>
 
                         <View className='flex-row space-x-9'>
                             <Pressable
@@ -365,7 +411,7 @@ const AddContact = (props) => {
                     </View>
 
                     
-                    <View className={(duration == "") ? 'border-b-4 border-gray-300 pt-2 mx-36': 'border-b-4 pt-2 mx-36'}></View>
+                    {/* <View className={(duration == "") ? 'border-b-4 border-gray-300 pt-2 mx-36': 'border-b-4 pt-2 mx-36'}></View> */}
 
 
                     <View>
@@ -375,7 +421,7 @@ const AddContact = (props) => {
                     </View>
 
                     
-                    <View className={'flex-col w-full space-y-6 px-4 mt-4 pt-2 border-2 rounded-lg bg-gray-100'}>
+                    <View className={'flex-col w-full space-y-6 px-4 mt-4 pt-2 rounded-lg bg-gray-100'}>
                         <Text
                             className='w-full h-7 pb-2 text-center text-lg text-black italic'>
                             How often do you want to reach out?

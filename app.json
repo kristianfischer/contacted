@@ -1,5 +1,6 @@
 {
   "expo": {
+    "scheme": "com.fishbowl.contacted",
     "plugins": [
       [
         "expo-image-picker",
@@ -9,6 +10,8 @@
       ]
     ],
     "name": "contacted",
+    "currentFullName": "@kristianfischer/contacted",
+    "originalFullName": "@kristianfischer/contacted",
     "slug": "contacted",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -23,16 +26,32 @@
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": false,
+      "bundleIdentifier": "com.fishbowl.contacted"
     },
     "android": {
+      "package": "com.fishbowl.contacted",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "permissions": [
+        "android.permission.RECORD_AUDIO"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "9bb84ab4-ec2f-4768-aa24-d8ec7d39aecd"
+      }
+    },
+    "runtimeVersion": {
+      "policy": "sdkVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/9bb84ab4-ec2f-4768-aa24-d8ec7d39aecd"
     }
   }
 }

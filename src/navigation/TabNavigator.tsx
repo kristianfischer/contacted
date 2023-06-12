@@ -1,9 +1,9 @@
 import React from "react";
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import Home from "../screens/Home";
+import Home from "../screens/Home/Home";
 import { MyTabBar } from "./TabBar";
-import Recommendations from "../screens/Recommendations";
-import ContactScreen from "../screens/ContactScreen";
+import Recommendations from "../screens/Reccomendations/Recommendations";
+import ContactScreen from "../screens/Contact/ContactScreen";
 
 
 
